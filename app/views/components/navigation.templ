@@ -1,0 +1,25 @@
+package components
+
+templ Navigation() {
+	<nav class="border-b py-3">
+		<div class="container mx-auto flex justify-between">
+			<div class="text-lg text-foreground">
+				<a href="/" class="font-semibold uppercase">Groupe Alesco Messages</a>
+			</div>
+			<div class="flex gap-4 items-center">
+				<div>
+					@ThemeSwitcher()
+				</div>
+				<div>
+					<a href="/" class="text-foreground">Messages</a>
+				</div>
+				<div>
+					<a href="/websites" class="text-foreground">Websites</a>
+				</div>
+				<div>
+					<a href="/profile" class="text-foreground">Profile</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+}
