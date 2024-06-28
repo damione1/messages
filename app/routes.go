@@ -58,8 +58,11 @@ func InitializeRoutes(router *chi.Mux) {
 		app.Delete("/message/{id}", kit.Handler(handlers.HandleMessageDelete))
 
 		// Websites
-		app.Get("/websites", kit.Handler(handlers.HandleSites))
-		app.Get("/websites/{id}", kit.Handler(handlers.HandleSite))
+		app.Get("/websites", kit.Handler(handlers.HandleWebsitesList))
+		app.Get("/website/{id}", kit.Handler(handlers.HandleWebsiteGet))
+		app.Post("/website", kit.Handler(handlers.HandleWebsiteCreate))
+		app.Patch("/website/{id}", kit.Handler(handlers.HandleWebsiteUpdate))
+		app.Delete("/website/{id}", kit.Handler(handlers.HandleWebsiteDelete))
 
 	})
 }

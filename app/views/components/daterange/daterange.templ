@@ -23,7 +23,6 @@ templ Daterange(props *DaterangeProps) {
 }
 
 script datePickerScript(props *DaterangeProps) {
-	console.log(props);
 	const fromInput = document.getElementById(props.Name + "From");
 	const toInput = document.getElementById(props.Name + "To");
 	const picker = new easepick.create({

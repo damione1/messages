@@ -2,35 +2,143 @@ package websites
 
 import (
 	"messages/app/views/layouts"
-	"messages/app/models"
+	"fmt"
+	"messages/app/views/components/modal"
+	"messages/app/views/components/inputField"
+	v "github.com/anthdm/superkit/validate"
 )
 
-templ Index(websitesList []*models.Website) {
+type IndexPageData struct {
+	WebsitesList []*WebsiteListItem
+	FormValues   WebsiteFormValues
+	FormErrors   v.Errors
+}
+
+templ Index(data *IndexPageData) {
 	@layouts.App() {
-		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-32">
-			<div class="flex flex-col gap-12">
-				for _, website := range websitesList {
-					@SingleWebsite(website)
-				}
-			</div>
-			if len(websitesList) == 0 {
+		//create website button
+		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
+			@component_modal.Modal(component_modal.ModalProps{
+				OpenButtonTxt:  "Add website",
+				OpenButtonClass: "bg-blue-500 hover:bg-gray-700 bg-gray-50 light:bg-gray-200 dark:bg-gray-900 dark:text-gray-400 font-bold py-2 px-4 rounded",
+				CloseButtonTxt: "Close",
+			}) {
+				<form hx-post="/website" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="websiteForm" hx-target="#websiteForm" hx-swap="innerHTML">
+					@WebsiteForm(data.FormValues, data.FormErrors)
+				</form>
+			}
+		</div>
+
+		<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					<tr>
+						<th scope="col" class="px-6 py-3">Name</th>
+						<th scope="col" class="px-6 py-3">Url</th>
+						<th scope="col" class="px-6 py-3">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, website := range data.WebsitesList {
+						@SingleWebsite(website)
+					}
+				</tbody>
+			</table>
+
+			if len(data.WebsitesList) == 0 {
 				<p class="text-gray-500">No websites</p>
 			}
 		</div>
 	}
 }
 
-templ SingleWebsite(singleWebsite *models.Website) {
-	<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-32">
-		<div class="p-6 bg-white rounded-lg shadow-md border border-gray-200 w-full max-w-lg">
-			<h2 class="text-2xl font-bold">{ singleWebsite.WebsiteName } </h2>
-			<p class="text-gray-500">{ singleWebsite.WebsiteUrl } </p>
-			<div class="flex gap-4 mt-4">
-				<a href="/websites/{singleWebsite.ID}/edit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</a>
-				<form action="/websites/{singleWebsite.ID}/delete" method="post">
-					<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete</button>
-				</form>
-			</div>
+type PageWebsiteEditData struct {
+	FormValues WebsiteFormValues
+	FormErrors v.Errors
+}
+
+templ PageWebsiteEdit(data *PageWebsiteEditData) {
+	@layouts.App() {
+		<div class="text-center flex flex-col justify-center items-center lg:mt-10">
+			<form hx-patch={string(templ.SafeURL(fmt.Sprintf("/website/%d", data.FormValues.ID)))} class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="websiteForm" hx-target="#websiteForm" hx-swap="outerHTML">
+				@WebsiteForm(data.FormValues, data.FormErrors)
+				<a href={ templ.SafeURL("/websites") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">Back to websites</a>
+			</form>
 		</div>
-	</div>
+	}
+}
+
+type WebsiteListItem struct {
+	ID          int64
+	Name      	string
+	URL         string
+}
+
+
+
+templ SingleWebsite(singleWebsite *WebsiteListItem) {
+    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+		<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"><a href={ templ.SafeURL(fmt.Sprintf("/website/%d", singleWebsite.ID)) } class="">{ singleWebsite.Name }</a></th>
+		<td class="px-6 py-4">{ singleWebsite.URL }</td>
+		<td class="px-6 py-4">
+		<a href={ templ.SafeURL(fmt.Sprintf("/website/%d", singleWebsite.ID)) } class="">Edit</a>
+		@deleteConfirmationModal( singleWebsite.ID)
+		</td>
+	</tr>
+}
+
+type WebsiteFormValues struct {
+	ID            int64 `form:"id"`
+	Name         string `form:"name"`
+	URL           string `form:"url"`
+}
+
+templ WebsiteForm(values WebsiteFormValues, errors v.Errors) {
+		<div class="mb-4">
+			@component_inputfield.InputField(&component_inputfield.InputFieldProps{
+				Label:       "Name",
+				Name:        "name",
+				Value:       values.Name,
+				Placeholder: "Name",
+				Error:       "",
+			})
+			if errors.Has("name") {
+				<div class="text-red-500 text-xs">{ errors.Get("name")[0] }</div>
+			}
+		</div>
+		<div class="mb-4">
+			@component_inputfield.InputField(&component_inputfield.InputFieldProps{
+				Label:       "Url",
+				Name:        "url",
+				Value:       values.URL,
+				Placeholder: "https://example.com",
+				Error:       "",
+			})
+			if errors.Has("name") {
+				<div class="text-red-500 text-xs">{ errors.Get("name")[0] }</div>
+			}
+		</div>
+
+		<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+			if values.ID > 0{
+				Update
+			} else {
+				Create
+			}
+		</button>
+}
+
+
+templ deleteConfirmationModal(deleteWebsiteID int64) {
+	@component_modal.Modal(component_modal.ModalProps{
+		OpenButtonTxt:  "Delete",
+		CloseButtonTxt: "Cancel",
+	}) {
+		<form hx-delete={ string(fmt.Sprintf("/website/%d", deleteWebsiteID)) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="deleteForm" hx-target="#deleteForm" hx-swap="outerHTML">
+			<p class="block text-gray-700 text-sm font-bold mb-2">Are you sure you want to delete this website?</p>
+			<div class="flex items-center justify-between mt-4">
+				<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">Confirm delete</button>
+			</div>
+		</form>
+	}
 }

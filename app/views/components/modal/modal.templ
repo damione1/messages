@@ -2,7 +2,9 @@ package component_modal
 
 type ModalProps struct {
 	OpenButtonTxt  string
+	OpenButtonClass string
 	CloseButtonTxt string
+	CloseButtonClass string
 }
 
 templ Modal(props ModalProps) {
@@ -11,9 +13,9 @@ templ Modal(props ModalProps) {
 		@keydown.escape.window="modalOpen = false"
 		class="relative z-50 w-auto h-auto"
 	>
-		<div @click="modalOpen=true" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+		<a @click="modalOpen=true" class={ props.OpenButtonClass } href="#">
 			{ props.OpenButtonTxt }
-		</div>
+		</a>
 		<template x-teleport="body">
 			<div x-show="modalOpen" class="fixed top-0 left-0 z-[99] flex items-center justify-center w-screen h-screen" x-cloak>
 				<div
@@ -36,10 +38,10 @@ templ Modal(props ModalProps) {
 					x-transition:leave="ease-in duration-200"
 					x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
 					x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-					class="relative  py-6 px-7 w-fit  sm:rounded-lg"
+					class="relative py-6 px-7 w-fit sm:rounded-lg max-h-screen overflow-y-auto hidden-scrollbar"
 				>
 					{ children... }
-					<div @click="modalOpen=false">
+					<div @click="modalOpen=false" class={ props.CloseButtonClass }>
 						{ props.CloseButtonTxt }
 					</div>
 				</div>

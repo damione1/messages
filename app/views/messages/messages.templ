@@ -2,7 +2,7 @@ package messages
 
 import (
 	"messages/app/views/layouts"
-	"messages/app/models"
+	"messages/app/helpers"
 	"time"
 	"fmt"
 	"messages/app/views/components/modal"
@@ -14,7 +14,7 @@ import (
 )
 
 type IndexPageData struct {
-	MessagesList []*models.Message
+	MessagesList []*MessageListItem
 	FormValues   MessageFormValues
 	FormErrors   v.Errors
 }
@@ -22,9 +22,10 @@ type IndexPageData struct {
 templ Index(data *IndexPageData) {
 	@layouts.App() {
 		//create message button
-		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-32">
+		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
 				OpenButtonTxt:  "Create Message",
+				OpenButtonClass: "bg-blue-500 hover:bg-gray-700 bg-gray-50 light:bg-gray-200 dark:bg-gray-900 dark:text-gray-400 font-bold py-2 px-4 rounded",
 				CloseButtonTxt: "Close",
 			}) {
 				<form hx-post="/message" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="innerHTML">
@@ -32,12 +33,26 @@ templ Index(data *IndexPageData) {
 				</form>
 			}
 		</div>
-		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-32">
-			<div class="flex flex-col gap-12">
-				for _, message := range data.MessagesList {
-					@SingleMessage(message)
-				}
-			</div>
+
+		<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					<tr>
+						<th scope="col" class="px-6 py-3">Title</th>
+						<th scope="col" class="px-6 py-3">Display from</th>
+						<th scope="col" class="px-6 py-3">Display to</th>
+						<th scope="col" class="px-6 py-3">Lang</th>
+						<th scope="col" class="px-6 py-3">Status</th>
+						<th scope="col" class="px-6 py-3">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, message := range data.MessagesList {
+						@SingleMessage(message)
+					}
+				</tbody>
+			</table>
+
 			if len(data.MessagesList) == 0 {
 				<p class="text-gray-500">No messages</p>
 			}
@@ -52,32 +67,43 @@ type PageMessageEditData struct {
 
 templ PageMessageEdit(data *PageMessageEditData) {
 	@layouts.App() {
-		//create message button
-		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-32">
+		<div class="text-center flex flex-col justify-center items-center lg:mt-10">
 			<form hx-patch={string(templ.SafeURL(fmt.Sprintf("/message/%d", data.FormValues.ID)))} class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="outerHTML">
 				@MessageForm(data.FormValues, data.FormErrors)
+				<a href={ templ.SafeURL("/messages") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">Back to messages</a>
 			</form>
 		</div>
 	}
 }
 
-templ SingleMessage(singleMessage *models.Message) {
-	<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-32">
-		<div class="p-6 rounded-lg shadow-md border border-gray-200 w-full max-w-xl">
-			<h2 class="text-2xl font-bold mb-2">
-				{ singleMessage.Title }
-			</h2>
-			<p class="text-gray-700 mb-4">
-				{ singleMessage.Message }
-			</p>
-			<div class="text-gray-500 text-sm">
-				<p>From: { singleMessage.DisplayFrom.Format("2006-01-02") }</p>
-				<p>To: { singleMessage.DisplayTo.Format("2006-01-02") }</p>
-			</div>
-		</div>
-		<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</a>
+type MessageListItem struct {
+	ID          int64
+	Title      	string
+	DisplayFrom time.Time
+	DisplayTo   time.Time
+	Language    string
+	Status      string
+}
+
+
+const (
+	ScheduledEnum string = "Scheduled"
+	ExpiredEnum   string = "Expired"
+	ActiveEnum    string = "Active"
+)
+
+templ SingleMessage(singleMessage *MessageListItem) {
+    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+		<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"><a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">{ singleMessage.Title }</a></th>
+		<td class="px-6 py-4">{ singleMessage.DisplayFrom.Format("2006-01-02") }</td>
+		<td class="px-6 py-4">{ singleMessage.DisplayTo.Format("2006-01-02") }</td>
+		<td class="px-6 py-4">{ singleMessage.Language }</td>
+		<td class="px-6 py-4">{ singleMessage.Status }</td>
+		<td class="px-6 py-4">
+		<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">Edit</a>
 		@deleteConfirmationModal( singleMessage.ID)
-	</div>
+		</td>
+	</tr>
 }
 
 type MessageFormValues struct {
@@ -144,17 +170,18 @@ templ MessageForm(values MessageFormValues, errors v.Errors) {
 			if errors.Has("dateRangeTo") {
 				<div class="text-red-500 text-xs">End date:{ errors.Get("dateRangeTo")[0] }</div>
 			}
+
+			if values.DateRangeFrom != ""  && values.DateRangeTo != "" {
+			<div class="text-gray-700 text-xs">Message displayed between the: { helpers.FormatDateForHumans(values.DateRangeFrom) } - { helpers.FormatDateForHumans(values.DateRangeTo) }</div>
+			}
 		</div>
-		//submit button
-		<div class="flex items-center justify-between">
-			<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-				if values.ID > 0{
-					Update
-				} else {
-					Create
-				}
-			</button>
-		</div>
+		<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+			if values.ID > 0{
+				Update
+			} else {
+				Create
+			}
+		</button>
 }
 
 

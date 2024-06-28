@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"messages/app/db"
 	"messages/app/models"
 	"messages/app/views/messages"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/anthdm/superkit/kit"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func HandleMessagesList(kit *kit.Kit) error {
@@ -22,11 +22,26 @@ func HandleMessagesList(kit *kit.Kit) error {
 		FormValues: getBaseMessageFormValues(),
 	}
 
-	messagesList, err := models.Messages().All(kit.Request.Context(), db.Query)
+	dbMessagesList, err := models.Messages(
+		qm.OrderBy("display_from DESC"),
+	).All(kit.Request.Context(), db.Query)
 	if err != nil {
 		return err
 	}
+
+	messagesList := make([]*messages.MessageListItem, 0, len(dbMessagesList))
+	for _, message := range dbMessagesList {
+		messagesList = append(messagesList, &messages.MessageListItem{
+			ID:          message.ID,
+			Title:       message.Title,
+			DisplayFrom: message.DisplayFrom,
+			DisplayTo:   message.DisplayTo,
+			Language:    message.Language,
+			Status:      getMessageStatus(message),
+		})
+	}
 	data.MessagesList = messagesList
+
 	return kit.Render(messages.Index(data))
 }
 
@@ -68,8 +83,6 @@ var createMessageSchema = v.Schema{
 
 func HandleMessageCreate(kit *kit.Kit) error {
 	formValues := getBaseMessageFormValues()
-
-	fmt.Println("Request: ", kit.Request)
 	errors, ok := v.Request(kit.Request, &formValues, createMessageSchema)
 	if !ok {
 		return kit.Render(messages.MessageForm(formValues, errors))
@@ -181,5 +194,17 @@ func getBaseMessageFormValues() messages.MessageFormValues {
 		DateRangeTo:   "",
 		Message:       "",
 		Title:         "",
+		Language:      "",
+	}
+}
+
+func getMessageStatus(message *models.Message) string {
+	switch {
+	case message.DisplayFrom.After(time.Now()):
+		return messages.ScheduledEnum
+	case message.DisplayTo.Before(time.Now()):
+		return messages.ExpiredEnum
+	default:
+		return messages.ActiveEnum
 	}
 }

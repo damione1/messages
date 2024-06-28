@@ -3,10 +3,12 @@ package layouts
 import "messages/app/views/components/navigation"
 
 templ App() {
-	@BaseLayout() {
-		@component_navigation.Navigation()
-		<div class="max-w-7xl mx-auto">
-			{ children... }
-		</div>
-	}
+	<div class="">
+		@BaseLayout() {
+			@component_navigation.Navigation()
+			<div class="max-w-7xl mx-auto">
+				{ children... }
+			</div>
+		}
+	</div>
 }
