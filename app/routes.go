@@ -50,20 +50,29 @@ func InitializeRoutes(router *chi.Mux) {
 			return kit.Redirect(302, "/messages")
 		}))
 
-		// Messages
+		app.Route("/message", func(r chi.Router) {
+			r.Get("/{id}", kit.Handler(handlers.HandleMessageGet))
+			r.Post("/", kit.Handler(handlers.HandleMessageCreate))
+			r.Patch("/{id}", kit.Handler(handlers.HandleMessageUpdate))
+			r.Delete("/{id}", kit.Handler(handlers.HandleMessageDelete))
+
+			r.Get("/", kit.Handler(func(kit *kit.Kit) error {
+				return kit.Redirect(302, "/messages")
+			}))
+		})
 		app.Get("/messages", kit.Handler(handlers.HandleMessagesList))
-		app.Get("/message/{id}", kit.Handler(handlers.HandleMessageGet))
-		app.Post("/message", kit.Handler(handlers.HandleMessageCreate))
-		app.Patch("/message/{id}", kit.Handler(handlers.HandleMessageUpdate))
-		app.Delete("/message/{id}", kit.Handler(handlers.HandleMessageDelete))
 
-		// Websites
+		app.Route("/website", func(r chi.Router) {
+			r.Get("/{id}", kit.Handler(handlers.HandleWebsiteGet))
+			r.Post("/", kit.Handler(handlers.HandleWebsiteCreate))
+			r.Patch("/{id}", kit.Handler(handlers.HandleWebsiteUpdate))
+			r.Delete("/{id}", kit.Handler(handlers.HandleWebsiteDelete))
+
+			r.Get("/", kit.Handler(func(kit *kit.Kit) error {
+				return kit.Redirect(302, "/websites")
+			}))
+		})
 		app.Get("/websites", kit.Handler(handlers.HandleWebsitesList))
-		app.Get("/website/{id}", kit.Handler(handlers.HandleWebsiteGet))
-		app.Post("/website", kit.Handler(handlers.HandleWebsiteCreate))
-		app.Patch("/website/{id}", kit.Handler(handlers.HandleWebsiteUpdate))
-		app.Delete("/website/{id}", kit.Handler(handlers.HandleWebsiteDelete))
-
 	})
 }
 

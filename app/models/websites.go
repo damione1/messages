@@ -23,44 +23,60 @@ import (
 
 // Website is an object representing the database table.
 type Website struct {
-	ID          int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
-	WebsiteName string `boil:"websiteName" json:"websiteName" toml:"websiteName" yaml:"websiteName"`
-	WebsiteUrl  string `boil:"websiteUrl" json:"websiteUrl" toml:"websiteUrl" yaml:"websiteUrl"`
+	ID      int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name    string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	URL     string `boil:"url" json:"url" toml:"url" yaml:"url"`
+	Staging bool   `boil:"staging" json:"staging" toml:"staging" yaml:"staging"`
 
 	R *websiteR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L websiteL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var WebsiteColumns = struct {
-	ID          string
-	WebsiteName string
-	WebsiteUrl  string
+	ID      string
+	Name    string
+	URL     string
+	Staging string
 }{
-	ID:          "id",
-	WebsiteName: "websiteName",
-	WebsiteUrl:  "websiteUrl",
+	ID:      "id",
+	Name:    "name",
+	URL:     "url",
+	Staging: "staging",
 }
 
 var WebsiteTableColumns = struct {
-	ID          string
-	WebsiteName string
-	WebsiteUrl  string
+	ID      string
+	Name    string
+	URL     string
+	Staging string
 }{
-	ID:          "websites.id",
-	WebsiteName: "websites.websiteName",
-	WebsiteUrl:  "websites.websiteUrl",
+	ID:      "websites.id",
+	Name:    "websites.name",
+	URL:     "websites.url",
+	Staging: "websites.staging",
 }
 
 // Generated where
 
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
 var WebsiteWhere = struct {
-	ID          whereHelperint64
-	WebsiteName whereHelperstring
-	WebsiteUrl  whereHelperstring
+	ID      whereHelperint64
+	Name    whereHelperstring
+	URL     whereHelperstring
+	Staging whereHelperbool
 }{
-	ID:          whereHelperint64{field: "\"websites\".\"id\""},
-	WebsiteName: whereHelperstring{field: "\"websites\".\"websiteName\""},
-	WebsiteUrl:  whereHelperstring{field: "\"websites\".\"websiteUrl\""},
+	ID:      whereHelperint64{field: "\"websites\".\"id\""},
+	Name:    whereHelperstring{field: "\"websites\".\"name\""},
+	URL:     whereHelperstring{field: "\"websites\".\"url\""},
+	Staging: whereHelperbool{field: "\"websites\".\"staging\""},
 }
 
 // WebsiteRels is where relationship names are stored.
@@ -91,9 +107,9 @@ func (r *websiteR) GetWebsiteIdWebsitesMessages() WebsitesMessageSlice {
 type websiteL struct{}
 
 var (
-	websiteAllColumns            = []string{"id", "websiteName", "websiteUrl"}
-	websiteColumnsWithoutDefault = []string{"websiteName", "websiteUrl"}
-	websiteColumnsWithDefault    = []string{"id"}
+	websiteAllColumns            = []string{"id", "name", "url", "staging"}
+	websiteColumnsWithoutDefault = []string{"name", "url"}
+	websiteColumnsWithDefault    = []string{"id", "staging"}
 	websitePrimaryKeyColumns     = []string{"id"}
 	websiteGeneratedColumns      = []string{"id"}
 )

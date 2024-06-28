@@ -6,6 +6,7 @@ import (
 	"messages/app/views/components/modal"
 	"messages/app/views/components/inputField"
 	v "github.com/anthdm/superkit/validate"
+	"messages/app/views/components/checkbox"
 )
 
 type IndexPageData struct {
@@ -19,22 +20,22 @@ templ Index(data *IndexPageData) {
 		//create website button
 		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:  "Add website",
+				OpenButtonTxt:   "Add website",
 				OpenButtonClass: "bg-blue-500 hover:bg-gray-700 bg-gray-50 light:bg-gray-200 dark:bg-gray-900 dark:text-gray-400 font-bold py-2 px-4 rounded",
-				CloseButtonTxt: "Close",
+				CloseButtonTxt:  "Close",
 			}) {
 				<form hx-post="/website" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="websiteForm" hx-target="#websiteForm" hx-swap="innerHTML">
 					@WebsiteForm(data.FormValues, data.FormErrors)
 				</form>
 			}
 		</div>
-
 		<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
 			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 					<tr>
 						<th scope="col" class="px-6 py-3">Name</th>
 						<th scope="col" class="px-6 py-3">Url</th>
+						<th scope="col" class="px-6 py-3">Is Staging?</th>
 						<th scope="col" class="px-6 py-3">Actions</th>
 					</tr>
 				</thead>
@@ -44,7 +45,6 @@ templ Index(data *IndexPageData) {
 					}
 				</tbody>
 			</table>
-
 			if len(data.WebsitesList) == 0 {
 				<p class="text-gray-500">No websites</p>
 			}
@@ -60,74 +60,86 @@ type PageWebsiteEditData struct {
 templ PageWebsiteEdit(data *PageWebsiteEditData) {
 	@layouts.App() {
 		<div class="text-center flex flex-col justify-center items-center lg:mt-10">
-			<form hx-patch={string(templ.SafeURL(fmt.Sprintf("/website/%d", data.FormValues.ID)))} class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="websiteForm" hx-target="#websiteForm" hx-swap="outerHTML">
-				@WebsiteForm(data.FormValues, data.FormErrors)
+			<div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+				<form hx-patch={ string(templ.SafeURL(fmt.Sprintf("/website/%d", data.FormValues.ID))) } class="" id="websiteForm" hx-target="#websiteForm" hx-swap="innerHTML">
+					@WebsiteForm(data.FormValues, data.FormErrors)
+				</form>
 				<a href={ templ.SafeURL("/websites") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">Back to websites</a>
-			</form>
+			</div>
 		</div>
 	}
 }
 
 type WebsiteListItem struct {
-	ID          int64
-	Name      	string
-	URL         string
+	ID      int64
+	Name    string
+	URL     string
+	Staging bool
 }
 
-
-
 templ SingleWebsite(singleWebsite *WebsiteListItem) {
-    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+	<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
 		<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"><a href={ templ.SafeURL(fmt.Sprintf("/website/%d", singleWebsite.ID)) } class="">{ singleWebsite.Name }</a></th>
 		<td class="px-6 py-4">{ singleWebsite.URL }</td>
+		if singleWebsite.Staging {
+			<td class="px-6 py-4">Yes</td>
+		} else {
+			<td class="px-6 py-4">No</td>
+		}
 		<td class="px-6 py-4">
-		<a href={ templ.SafeURL(fmt.Sprintf("/website/%d", singleWebsite.ID)) } class="">Edit</a>
-		@deleteConfirmationModal( singleWebsite.ID)
+			<a href={ templ.SafeURL(fmt.Sprintf("/website/%d", singleWebsite.ID)) } class="">Edit</a>
+			@deleteConfirmationModal(singleWebsite.ID)
 		</td>
 	</tr>
 }
 
 type WebsiteFormValues struct {
-	ID            int64 `form:"id"`
-	Name         string `form:"name"`
-	URL           string `form:"url"`
+	ID      int64  `form:"id"`
+	Name    string `form:"name"`
+	URL     string `form:"url"`
+	Staging bool   `form:"staging"`
 }
 
 templ WebsiteForm(values WebsiteFormValues, errors v.Errors) {
-		<div class="mb-4">
-			@component_inputfield.InputField(&component_inputfield.InputFieldProps{
-				Label:       "Name",
-				Name:        "name",
-				Value:       values.Name,
-				Placeholder: "Name",
-				Error:       "",
-			})
-			if errors.Has("name") {
-				<div class="text-red-500 text-xs">{ errors.Get("name")[0] }</div>
-			}
-		</div>
-		<div class="mb-4">
-			@component_inputfield.InputField(&component_inputfield.InputFieldProps{
-				Label:       "Url",
-				Name:        "url",
-				Value:       values.URL,
-				Placeholder: "https://example.com",
-				Error:       "",
-			})
-			if errors.Has("name") {
-				<div class="text-red-500 text-xs">{ errors.Get("name")[0] }</div>
-			}
-		</div>
-
-		<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-			if values.ID > 0{
-				Update
-			} else {
-				Create
-			}
-		</button>
+	<div class="mb-4">
+		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
+			Label:       "Name",
+			Name:        "name",
+			Value:       values.Name,
+			Placeholder: "Name",
+			Error:       "",
+		})
+		if errors.Has("name") {
+			<div class="text-red-500 text-xs">{ errors.Get("name")[0] }</div>
+		}
+	</div>
+	<div class="mb-4">
+		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
+			Label:       "Url",
+			Name:        "url",
+			Value:       values.URL,
+			Placeholder: "https://example.com",
+			Error:       "",
+		})
+		if errors.Has("url") {
+			<div class="text-red-500 text-xs">{ errors.Get("url")[0] }</div>
+		}
+	</div>
+	<div class="mb-4">
+		@component_checkbox.Checkbox(&component_checkbox.CheckboxProps{
+			Label: "Is staging website?",
+			Name:  "staging",
+			Value: values.Staging,
+		})
+	</div>
+	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+		if values.ID > 0 {
+			Update
+		} else {
+			Create
+		}
+	</button>
 }
-
 
 templ deleteConfirmationModal(deleteWebsiteID int64) {
 	@component_modal.Modal(component_modal.ModalProps{

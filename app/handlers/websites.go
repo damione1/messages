@@ -28,9 +28,10 @@ func HandleWebsitesList(kit *kit.Kit) error {
 	websitesList := make([]*websites.WebsiteListItem, 0, len(dbWebsitesList))
 	for _, website := range dbWebsitesList {
 		websitesList = append(websitesList, &websites.WebsiteListItem{
-			ID:   website.ID,
-			Name: website.WebsiteName,
-			URL:  website.WebsiteUrl,
+			ID:      website.ID,
+			Name:    website.Name,
+			URL:     website.URL,
+			Staging: website.Staging,
 		})
 	}
 	data.WebsitesList = websitesList
@@ -56,16 +57,18 @@ func HandleWebsiteGet(kit *kit.Kit) error {
 		FormErrors: v.Errors{},
 	}
 
-	data.FormValues.Name = dbWebsite.WebsiteName
-	data.FormValues.URL = dbWebsite.WebsiteUrl
+	data.FormValues.Name = dbWebsite.Name
+	data.FormValues.URL = dbWebsite.URL
 	data.FormValues.ID = dbWebsite.ID
+	data.FormValues.Staging = dbWebsite.Staging
 
 	return kit.Render(websites.PageWebsiteEdit(data))
 }
 
 var createWebsiteSchema = v.Schema{
-	"name": v.Rules(v.Required),
-	"url":  v.Rules(v.Required),
+	"name":    v.Rules(v.Required),
+	"URL":     v.Rules(v.Required),
+	"staging": v.Rules(),
 }
 
 func HandleWebsiteCreate(kit *kit.Kit) error {
@@ -76,8 +79,9 @@ func HandleWebsiteCreate(kit *kit.Kit) error {
 	}
 
 	website := models.Website{
-		WebsiteName: formValues.Name,
-		WebsiteUrl:  formValues.URL,
+		Name:    formValues.Name,
+		URL:     formValues.URL,
+		Staging: formValues.Staging,
 	}
 
 	err := website.Insert(kit.Request.Context(), db.Query, boil.Infer())
@@ -111,8 +115,9 @@ func HandleWebsiteUpdate(kit *kit.Kit) error {
 		return err
 	}
 
-	website.WebsiteName = formValues.Name
-	website.WebsiteUrl = formValues.URL
+	website.Name = formValues.Name
+	website.URL = formValues.URL
+	website.Staging = formValues.Staging
 
 	_, err = website.Update(kit.Request.Context(), db.Query, boil.Infer())
 	if err != nil {
