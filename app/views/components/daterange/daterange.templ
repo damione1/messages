@@ -1,0 +1,68 @@
+package component_daterange
+
+import (
+	"time"
+)
+
+type DaterangeProps struct {
+	Label    string
+	Name     string
+	DateFrom string
+	DateTo   string
+	DateMin  time.Time
+	DateMax  time.Time
+}
+
+templ Daterange(props *DaterangeProps) {
+	<div class="form-group">
+		<label class="block text-gray-700 text-sm font-bold mb-2" for={ props.Name }>{ props.Label }</label>
+		<input type="hidden" id={ props.Name + "From" } name={ props.Name + "From" } value={ props.DateFrom }/>
+		<input type="hidden" id={ props.Name + "To" } name={ props.Name + "To" } value={ props.DateTo }/>
+		<input type="hidden" id="datePicker" value={ props.DateFrom + ";" + props.DateTo }/>
+	</div>
+	@datePickerScript(props)
+}
+
+script datePickerScript(props *DaterangeProps) {
+	console.log(props);
+	const fromInput = document.getElementById(props.Name + "From");
+	const toInput = document.getElementById(props.Name + "To");
+	const picker = new easepick.create({
+		element: document.getElementById('datePicker'),
+		css: [
+			"https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css"
+		],
+		zIndex: 10,
+		lang: "fr-FR",
+		grid: 2,
+		calendars: 2,
+		format: "YYYY-MM-DDTHH:mm:ssZ",
+		inline: true,
+		autoApply: true,
+		startDate: props.DateFrom ?? "",
+		endDate: props.DateTo ?? "",
+		RangePlugin: {
+			input: "#checkin",
+			delimiter: ";",
+		},
+		LockPlugin: {
+			minDate: props.DateMin,
+			maxDate: props.DateMax
+		},
+
+		plugins: [
+			"RangePlugin",
+			"LockPlugin"
+		],
+		setup(picker) {
+			picker.on('select', (e) => {
+				if (fromInput && toInput) {
+					fromInput.value = e.detail.start.format("YYYY-MM-DDTHH:mm:ssZ");
+					toInput.value = e.detail.end.format("YYYY-MM-DDTHH:mm:ssZ");
+				} else {
+					console.error("Date input fields not found!");
+				}
+			});
+  		},
+	});
+}

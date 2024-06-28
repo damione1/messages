@@ -1,0 +1,38 @@
+package component_selectField
+
+type SelectFieldProps struct {
+	Label       string
+	Name        string
+	Value       string
+	Placeholder string
+	Options     map[string]string
+	Error       string
+}
+
+templ SelectField(props *SelectFieldProps) {
+	<div class="form-group">
+		<label class="block text-gray-700 text-sm font-bold mb-2" for={ props.Name }>{ props.Label }</label>
+		<select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id={ props.Name } name={ props.Name }>
+			@selectOption(props.Options, props.Placeholder, props.Value)
+		</select>
+		if props.Error != "" {
+			<small class="form-text text-danger">{ props.Error }</small>
+		}
+	</div>
+}
+
+templ selectOption(options map[string]string, placeholder string, value string) {
+	if placeholder != ""  && value == "" {
+		<option value="" disabled selected>{ placeholder }</option>
+	} else {
+		<option value="" disabled>{ placeholder }</option>
+	}
+
+	for key, val := range options {
+		if key == value {
+			<option value={ key } selected>{ val }</option>
+		} else {
+			<option value={ key }>{ val }</option>
+		}
+	}
+}

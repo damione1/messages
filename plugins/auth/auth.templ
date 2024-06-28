@@ -4,7 +4,7 @@ import (
 	v "github.com/anthdm/superkit/validate"
 
 	"messages/app/views/layouts"
-	"messages/app/views/components"
+	"messages/app/views/components/themeswitcher"
 )
 
 type AuthIndexPageData struct {
@@ -20,7 +20,7 @@ type LoginFormValues struct {
 templ AuthIndex(data AuthIndexPageData) {
 	@layouts.BaseLayout() {
 		<div class="fixed top-6 right-6">
-			@components.ThemeSwitcher()
+			@component_themeswitcher.ThemeSwitcher()
 		</div>
 		<div class="w-full justify-center gap-10">
 			<div class="mt-10 lg:mt-40">

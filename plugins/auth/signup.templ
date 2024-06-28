@@ -3,7 +3,7 @@ package auth
 import (
 	v "github.com/anthdm/superkit/validate"
 	"messages/app/views/layouts"
-	"messages/app/views/components"
+	"messages/app/views/components/themeswitcher"
 )
 
 type SignupIndexPageData struct {
@@ -22,7 +22,7 @@ type SignupFormValues struct {
 templ SignupIndex(data SignupIndexPageData) {
 	@layouts.BaseLayout() {
 		<div class="fixed top-6 right-6">
-			@components.ThemeSwitcher()
+			@component_themeswitcher.ThemeSwitcher()
 		</div>
 		<div class="w-full justify-center">
 			<div class="mt-10 lg:mt-20">

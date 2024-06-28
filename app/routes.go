@@ -46,10 +46,18 @@ func InitializeRoutes(router *chi.Mux) {
 	router.Group(func(app chi.Router) {
 		app.Use(kit.WithAuthentication(authConfig, true)) // strict set to true
 
-		// Routes
-		app.Get("/", kit.Handler(handlers.HandleMessages))
-		app.Get("/message/{id}", kit.Handler(handlers.HandleMessage))
+		app.Get("/", kit.Handler(func(kit *kit.Kit) error {
+			return kit.Redirect(302, "/messages")
+		}))
 
+		// Messages
+		app.Get("/messages", kit.Handler(handlers.HandleMessagesList))
+		app.Get("/message/{id}", kit.Handler(handlers.HandleMessageGet))
+		app.Post("/message", kit.Handler(handlers.HandleMessageCreate))
+		app.Patch("/message/{id}", kit.Handler(handlers.HandleMessageUpdate))
+		app.Delete("/message/{id}", kit.Handler(handlers.HandleMessageDelete))
+
+		// Websites
 		app.Get("/websites", kit.Handler(handlers.HandleSites))
 		app.Get("/websites/{id}", kit.Handler(handlers.HandleSite))
 

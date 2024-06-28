@@ -9,7 +9,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "tailwindcss": "^3.4.3",
-    "esbuild": "^0.21.5"
+    "esbuild": "^0.21.5",
+    "tailwindcss": "^3.4.3"
+  },
+  "dependencies": {
+    "wc-datepicker": "^0.5.3"
   }
 }

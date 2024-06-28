@@ -1,0 +1,19 @@
+package component_textarea
+
+type TextareaProps struct {
+	Label       string
+	Name        string
+	Value       string
+	Placeholder string
+	Error       string
+}
+
+templ Textarea(props *TextareaProps) {
+	<div class="form-group">
+		<label class="block text-gray-700 text-sm font-bold mb-2" for={ props.Name }>{ props.Label }</label>
+		<textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id={ props.Name } name={ props.Name } placeholder={ props.Placeholder }>{ props.Value }</textarea>
+		// { if props.Error != "" }
+		// <small class="form-text text-danger">{ props.Error }</small>
+		// { end }
+	</div>
+}
