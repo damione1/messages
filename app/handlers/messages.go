@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"messages/app/db"
 	"messages/app/models"
 	"messages/app/views/messages"
@@ -19,7 +21,8 @@ import (
 
 func HandleMessagesList(kit *kit.Kit) error {
 	data := &messages.IndexPageData{
-		FormValues: getBaseMessageFormValues(),
+		FormValues:   &messages.MessageFormValues{},
+		FormSettings: getBaseMessageFormSettings(kit.Request.Context()),
 	}
 
 	dbMessagesList, err := models.Messages(
@@ -59,16 +62,17 @@ func HandleMessageGet(kit *kit.Kit) error {
 	}
 
 	data := &messages.PageMessageEditData{
-		FormValues: getBaseMessageFormValues(),
-		FormErrors: v.Errors{},
+		FormValues: &messages.MessageFormValues{
+			ID:            messageId,
+			DateRangeFrom: dbMessage.DisplayFrom.Format(time.RFC3339),
+			DateRangeTo:   dbMessage.DisplayTo.Format(time.RFC3339),
+			Message:       dbMessage.Message,
+			Title:         dbMessage.Title,
+			Language:      dbMessage.Language,
+		},
+		FormSettings: getBaseMessageFormSettings(kit.Request.Context()),
+		FormErrors:   v.Errors{},
 	}
-
-	data.FormValues.DateRangeFrom = dbMessage.DisplayFrom.Format(time.RFC3339)
-	data.FormValues.DateRangeTo = dbMessage.DisplayTo.Format(time.RFC3339)
-	data.FormValues.Message = dbMessage.Message
-	data.FormValues.Title = dbMessage.Title
-	data.FormValues.Language = dbMessage.Language
-	data.FormValues.ID = dbMessage.ID
 
 	return kit.Render(messages.PageMessageEdit(data))
 }
@@ -82,10 +86,12 @@ var createMessageSchema = v.Schema{
 }
 
 func HandleMessageCreate(kit *kit.Kit) error {
-	formValues := getBaseMessageFormValues()
+	formValues := &messages.MessageFormValues{}
+	formSettings := getBaseMessageFormSettings(kit.Request.Context())
+
 	errors, ok := v.Request(kit.Request, &formValues, createMessageSchema)
 	if !ok {
-		return kit.Render(messages.MessageForm(formValues, errors))
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	displayFrom, err := time.Parse(time.RFC3339, formValues.DateRangeFrom)
@@ -123,12 +129,14 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 		return errors.New("Not found")
 	}
 
-	formValues := getBaseMessageFormValues()
-	formValues.ID = messageId
+	formValues := &messages.MessageFormValues{
+		ID: messageId,
+	}
+	formSettings := getBaseMessageFormSettings(kit.Request.Context())
 
 	errors, ok := v.Request(kit.Request, &formValues, createMessageSchema)
 	if !ok {
-		return kit.Render(messages.MessageForm(formValues, errors))
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	displayFrom, err := time.Parse(time.RFC3339, formValues.DateRangeFrom)
@@ -186,16 +194,25 @@ func HandleMessageDelete(kit *kit.Kit) error {
 	return kit.Redirect(200, "/messages")
 }
 
-func getBaseMessageFormValues() messages.MessageFormValues {
-	return messages.MessageFormValues{
-		DateMin:       time.Now(),
-		DateMax:       time.Now().AddDate(1, 0, 0),
-		DateRangeFrom: "",
-		DateRangeTo:   "",
-		Message:       "",
-		Title:         "",
-		Language:      "",
+func getBaseMessageFormSettings(ctx context.Context) *messages.MessageFormSettings {
+
+	settings := &messages.MessageFormSettings{
+		DateMin: time.Now(),
+		DateMax: time.Now().AddDate(1, 0, 0),
 	}
+
+	dbWebsitesList, err := models.Websites().All(ctx, db.Query)
+	if err != nil {
+		return settings
+	}
+
+	websitesList := make(map[string]string, len(dbWebsitesList))
+	for _, website := range dbWebsitesList {
+		websitesList[strconv.FormatInt(website.ID, 10)] = fmt.Sprintf("%s (%s)", website.Name, website.URL)
+	}
+	settings.Websites = websitesList
+
+	return settings
 }
 
 func getMessageStatus(message *models.Message) string {

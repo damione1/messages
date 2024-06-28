@@ -10,11 +10,14 @@ import (
 	"messages/app/views/components/inputField"
 	"messages/app/views/components/selectField"
 	v "github.com/anthdm/superkit/validate"
+	"messages/app/views/websites"
 )
 
 type IndexPageData struct {
 	MessagesList []*MessageListItem
-	FormValues   MessageFormValues
+	FormValues   *MessageFormValues
+	FormSettings *MessageFormSettings
+	Websites     []*websites.WebsiteListItem
 	FormErrors   v.Errors
 }
 
@@ -28,7 +31,7 @@ templ Index(data *IndexPageData) {
 				CloseButtonTxt:  "Close",
 			}) {
 				<form hx-post="/message" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="innerHTML">
-					@MessageForm(data.FormValues, data.FormErrors)
+					@MessageForm(data.FormValues, data.FormSettings, data.FormErrors)
 				</form>
 			}
 		</div>
@@ -58,15 +61,16 @@ templ Index(data *IndexPageData) {
 }
 
 type PageMessageEditData struct {
-	FormValues MessageFormValues
-	FormErrors v.Errors
+	FormValues   *MessageFormValues
+	FormSettings *MessageFormSettings
+	FormErrors   v.Errors
 }
 
 templ PageMessageEdit(data *PageMessageEditData) {
 	@layouts.App() {
 		<div class="text-center flex flex-col justify-center items-center lg:mt-10">
 			<form hx-patch={ string(templ.SafeURL(fmt.Sprintf("/message/%d", data.FormValues.ID))) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="outerHTML">
-				@MessageForm(data.FormValues, data.FormErrors)
+				@MessageForm(data.FormValues, data.FormSettings, data.FormErrors)
 				<a href={ templ.SafeURL("/messages") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">Back to messages</a>
 			</form>
 		</div>
@@ -102,6 +106,12 @@ templ SingleMessage(singleMessage *MessageListItem) {
 	</tr>
 }
 
+type MessageFormSettings struct {
+	DateMin  time.Time
+	DateMax  time.Time
+	Websites map[string]string
+}
+
 type MessageFormValues struct {
 	ID            int64  `form:"id"`
 	Title         string `form:"title"`
@@ -109,11 +119,9 @@ type MessageFormValues struct {
 	Language      string `form:"language"`
 	DateRangeFrom string `form:"dateRangeFrom"`
 	DateRangeTo   string `form:"dateRangeTo"`
-	DateMin       time.Time
-	DateMax       time.Time
 }
 
-templ MessageForm(values MessageFormValues, errors v.Errors) {
+templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, errors v.Errors) {
 	<div class="mb-4">
 		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
 			Label:       "Title",
@@ -146,6 +154,7 @@ templ MessageForm(values MessageFormValues, errors v.Errors) {
 			Error:       "",
 			Options:     map[string]string{"fr": "French", "en": "English"},
 			Value:       values.Language,
+			Multiple:    false,
 		})
 		if errors.Has("language") {
 			<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
@@ -157,14 +166,28 @@ templ MessageForm(values MessageFormValues, errors v.Errors) {
 			Name:     "dateRange",
 			DateFrom: values.DateRangeFrom,
 			DateTo:   values.DateRangeTo,
-			DateMin:  values.DateMin,
-			DateMax:  values.DateMax,
+			DateMin:  settings.DateMin,
+			DateMax:  settings.DateMax,
 		})
 		if errors.Has("dateRangeFrom") {
 			<div class="text-red-500 text-xs">Start date: { errors.Get("dateRangeFrom")[0] }</div>
 		}
 		if errors.Has("dateRangeTo") {
 			<div class="text-red-500 text-xs">End date:{ errors.Get("dateRangeTo")[0] }</div>
+		}
+	</div>
+	<div class="mb-4">
+		@component_selectField.SelectField(&component_selectField.SelectFieldProps{
+			Label:       "Websites to display",
+			Name:        "websites",
+			Placeholder: "",
+			Error:       "",
+			Options:     settings.Websites,
+			Value:       values.Language,
+			Multiple:    true,
+		})
+		if errors.Has("language") {
+			<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
 		}
 	</div>
 	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
