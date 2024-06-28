@@ -24,16 +24,15 @@ templ Index(data *IndexPageData) {
 		//create message button
 		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:  "Create Message",
+				OpenButtonTxt:   "Create Message",
 				OpenButtonClass: "bg-blue-500 hover:bg-gray-700 bg-gray-50 light:bg-gray-200 dark:bg-gray-900 dark:text-gray-400 font-bold py-2 px-4 rounded",
-				CloseButtonTxt: "Close",
+				CloseButtonTxt:  "Close",
 			}) {
 				<form hx-post="/message" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="innerHTML">
 					@MessageForm(data.FormValues, data.FormErrors)
 				</form>
 			}
 		</div>
-
 		<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
 			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -52,7 +51,6 @@ templ Index(data *IndexPageData) {
 					}
 				</tbody>
 			</table>
-
 			if len(data.MessagesList) == 0 {
 				<p class="text-gray-500">No messages</p>
 			}
@@ -68,7 +66,7 @@ type PageMessageEditData struct {
 templ PageMessageEdit(data *PageMessageEditData) {
 	@layouts.App() {
 		<div class="text-center flex flex-col justify-center items-center lg:mt-10">
-			<form hx-patch={string(templ.SafeURL(fmt.Sprintf("/message/%d", data.FormValues.ID)))} class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="outerHTML">
+			<form hx-patch={ string(templ.SafeURL(fmt.Sprintf("/message/%d", data.FormValues.ID))) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="outerHTML">
 				@MessageForm(data.FormValues, data.FormErrors)
 				<a href={ templ.SafeURL("/messages") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">Back to messages</a>
 			</form>
@@ -78,13 +76,12 @@ templ PageMessageEdit(data *PageMessageEditData) {
 
 type MessageListItem struct {
 	ID          int64
-	Title      	string
+	Title       string
 	DisplayFrom time.Time
 	DisplayTo   time.Time
 	Language    string
 	Status      string
 }
-
 
 const (
 	ScheduledEnum string = "Scheduled"
@@ -93,21 +90,21 @@ const (
 )
 
 templ SingleMessage(singleMessage *MessageListItem) {
-    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+	<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
 		<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"><a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">{ singleMessage.Title }</a></th>
 		<td class="px-6 py-4">{ singleMessage.DisplayFrom.Format("2006-01-02") }</td>
 		<td class="px-6 py-4">{ singleMessage.DisplayTo.Format("2006-01-02") }</td>
 		<td class="px-6 py-4">{ singleMessage.Language }</td>
 		<td class="px-6 py-4">{ singleMessage.Status }</td>
 		<td class="px-6 py-4">
-		<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">Edit</a>
-		@deleteConfirmationModal( singleMessage.ID)
+			<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">Edit</a>
+			@deleteConfirmationModal(singleMessage.ID)
 		</td>
 	</tr>
 }
 
 type MessageFormValues struct {
-	ID            int64 `form:"id"`
+	ID            int64  `form:"id"`
 	Title         string `form:"title"`
 	Message       string `form:"message"`
 	Language      string `form:"language"`
@@ -118,72 +115,67 @@ type MessageFormValues struct {
 }
 
 templ MessageForm(values MessageFormValues, errors v.Errors) {
-		<div class="mb-4">
-			@component_inputfield.InputField(&component_inputfield.InputFieldProps{
-				Label:       "Title",
-				Name:        "title",
-				Value:       values.Title,
-				Placeholder: "Title",
-				Error:       "",
-			})
-			if errors.Has("title") {
-				<div class="text-red-500 text-xs">{ errors.Get("title")[0] }</div>
-			}
-		</div>
-		<div class="mb-4">
-			@component_textarea.Textarea(&component_textarea.TextareaProps{
-				Label:       "Message",
-				Name:        "message",
-				Value:       values.Message,
-				Placeholder: "Message",
-				Error:       "",
-			})
-			if errors.Has("message") {
-				<div class="text-red-500 text-xs">{ errors.Get("message")[0] }</div>
-			}
-		</div>
-		<div class="mb-4">
-			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
-				Label:   "Language",
-				Name:    "language",
-				Placeholder: "Select language",
-				Error:   "",
-				Options: map[string]string{"fr": "French", "en": "English"},
-				Value:   values.Language,
-			})
-			if errors.Has("language") {
-				<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
-			}
-		</div>
-		<div class="mb-4">
-			@component_daterange.Daterange(&component_daterange.DaterangeProps{
-				Label:    "Display Date Range",
-				Name:     "dateRange",
-				DateFrom: values.DateRangeFrom,
-				DateTo:   values.DateRangeTo,
-				DateMin:  values.DateMin,
-				DateMax:  values.DateMax,
-			})
-			if errors.Has("dateRangeFrom") {
-				<div class="text-red-500 text-xs">Start date: { errors.Get("dateRangeFrom")[0] }</div>
-			}
-			if errors.Has("dateRangeTo") {
-				<div class="text-red-500 text-xs">End date:{ errors.Get("dateRangeTo")[0] }</div>
-			}
-
-			if values.DateRangeFrom != ""  && values.DateRangeTo != "" {
-			<div class="text-gray-700 text-xs">Message displayed between the: { helpers.FormatDateForHumans(values.DateRangeFrom) } - { helpers.FormatDateForHumans(values.DateRangeTo) }</div>
-			}
-		</div>
-		<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-			if values.ID > 0{
-				Update
-			} else {
-				Create
-			}
-		</button>
+	<div class="mb-4">
+		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
+			Label:       "Title",
+			Name:        "title",
+			Value:       values.Title,
+			Placeholder: "Title",
+			Error:       "",
+		})
+		if errors.Has("title") {
+			<div class="text-red-500 text-xs">{ errors.Get("title")[0] }</div>
+		}
+	</div>
+	<div class="mb-4">
+		@component_textarea.Textarea(&component_textarea.TextareaProps{
+			Label:       "Message",
+			Name:        "message",
+			Value:       values.Message,
+			Placeholder: "Message",
+			Error:       "",
+		})
+		if errors.Has("message") {
+			<div class="text-red-500 text-xs">{ errors.Get("message")[0] }</div>
+		}
+	</div>
+	<div class="mb-4">
+		@component_selectField.SelectField(&component_selectField.SelectFieldProps{
+			Label:       "Language",
+			Name:        "language",
+			Placeholder: "Select language",
+			Error:       "",
+			Options:     map[string]string{"fr": "French", "en": "English"},
+			Value:       values.Language,
+		})
+		if errors.Has("language") {
+			<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
+		}
+	</div>
+	<div class="mb-4">
+		@component_daterange.Daterange(&component_daterange.DaterangeProps{
+			Label:    "Display Date Range",
+			Name:     "dateRange",
+			DateFrom: values.DateRangeFrom,
+			DateTo:   values.DateRangeTo,
+			DateMin:  values.DateMin,
+			DateMax:  values.DateMax,
+		})
+		if errors.Has("dateRangeFrom") {
+			<div class="text-red-500 text-xs">Start date: { errors.Get("dateRangeFrom")[0] }</div>
+		}
+		if errors.Has("dateRangeTo") {
+			<div class="text-red-500 text-xs">End date:{ errors.Get("dateRangeTo")[0] }</div>
+		}
+	</div>
+	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+		if values.ID > 0 {
+			Update
+		} else {
+			Create
+		}
+	</button>
 }
-
 
 templ deleteConfirmationModal(deleteMessageID int64) {
 	@component_modal.Modal(component_modal.ModalProps{

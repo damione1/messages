@@ -48,10 +48,14 @@ script datePickerScript(props *DaterangeProps) {
 			minDate: props.DateMin,
 			maxDate: props.DateMax
 		},
-
 		plugins: [
 			"RangePlugin",
 			"LockPlugin"
 		],
+		setup(picker) {
+			if (props.DateFrom !== '') {
+				picker.gotoDate(props.DateFrom);
+			}
+  		},
 	});
 }
