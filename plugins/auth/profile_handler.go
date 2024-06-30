@@ -25,14 +25,6 @@ type ProfileFormValues struct {
 func HandleProfileShow(kit *kit.Kit) error {
 	auth := kit.Auth().(Auth)
 
-	// var user User
-	// err := db.Query.NewSelect().
-	// 	Model(&user).
-	// 	Where("id = ?", auth.UserID).
-	// 	Scan(kit.Request.Context())
-	// if err != nil {
-	// 	return err
-	// }
 	user, err := models.Users(
 		models.UserWhere.ID.EQ(int64(auth.UserID)),
 	).One(kit.Request.Context(), db.Query)
@@ -61,15 +53,7 @@ func HandleProfileUpdate(kit *kit.Kit) error {
 	if auth.UserID != values.ID {
 		return fmt.Errorf("unauthorized request for profile %d", values.ID)
 	}
-	// _, err := db.Query.NewUpdate().
-	// 	Model((*User)(nil)).
-	// 	Set("first_name = ?", values.FirstName).
-	// 	Set("last_name = ?", values.LastName).
-	// 	Where("id = ?", auth.UserID).
-	// 	Exec(kit.Request.Context())
-	// if err != nil {
-	// 	return err
-	// }
+
 	_, err := models.Users(
 		models.UserWhere.ID.EQ(int64(auth.UserID)),
 	).UpdateAll(kit.Request.Context(), db.Query, models.M{

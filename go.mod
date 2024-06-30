@@ -10,6 +10,7 @@ require (
 	github.com/anthdm/superkit v0.0.0-20240623141236-28df405fd0f3
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/gomarkdown/markdown v0.0.0-20240626202925-2eda941fd024
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.22

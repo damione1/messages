@@ -9,6 +9,10 @@ import (
 	"github.com/anthdm/superkit/kit"
 	"github.com/go-chi/chi/v5"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
 )
 
 type Message struct {
@@ -84,7 +88,7 @@ func HandleApi(kit *kit.Kit) error {
 	for _, dbMessage := range dbMessageList {
 		message := Message{
 			Title:   dbMessage.Title,
-			Message: dbMessage.Message,
+			Message: string(mdToHTML([]byte(dbMessage.Message))),
 			Type:    dbMessage.Type,
 		}
 		if dbWebsite.Staging && dbMessage.DisplayFrom.After(time.Now()) {
@@ -99,4 +103,18 @@ func HandleApi(kit *kit.Kit) error {
 
 func IsValidLanguage(lang string) bool {
 	return lang == "en" || lang == "fr"
+}
+
+func mdToHTML(md []byte) []byte {
+	// create markdown parser with extensions
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(extensions)
+	doc := p.Parse(md)
+
+	// create HTML renderer with extensions
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+	renderer := html.NewRenderer(opts)
+
+	return markdown.Render(doc, renderer)
 }

@@ -1,12 +1,15 @@
 package component_navigation
 
-import "messages/app/views/components/themeswitcher"
+import (
+	"messages/app/views/components/themeswitcher"
+	"os"
+)
 
 templ Navigation() {
 	<nav class="border-b py-3">
 		<div class="container mx-auto flex justify-between">
 			<div class="text-lg text-foreground">
-				<a href="/messages" class="font-semibold uppercase">Groupe Alesco Messages</a>
+				<a href="/messages" class="font-semibold uppercase">{ getAppName() }</a>
 			</div>
 			<div class="flex gap-4 items-center">
 				<div>
@@ -24,4 +27,12 @@ templ Navigation() {
 			</div>
 		</div>
 	</nav>
+}
+
+func getAppName() string {
+	if appName := os.Getenv("APP_NAME"); appName != "" {
+		return appName
+	} else {
+		return "Messages"
+	}
 }
