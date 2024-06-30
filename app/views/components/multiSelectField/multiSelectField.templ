@@ -1,0 +1,77 @@
+package component_multiSelectField
+
+import (
+	"fmt"
+	"net/http"
+	"reflect"
+)
+
+type MultiSelectFieldProps struct {
+	Label       string
+	Name        string
+	Values      []string
+	Placeholder string
+	Options     map[string]string
+	Error       string
+}
+
+templ MultiSelectField(props *MultiSelectFieldProps) {
+	<div class="form-group">
+		<label class="block text-gray-700 text-sm font-bold mb-2" for={ props.Name }>{ props.Label }</label>
+		<select multiple class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id={ props.Name } name={ props.Name }>
+			@selectOption(props.Options, props.Placeholder, props.Values)
+		</select>
+		if props.Error != "" {
+			<small class="form-text text-danger">{ props.Error }</small>
+		}
+	</div>
+}
+
+templ selectOption(options map[string]string, placeholder string, values []string) {
+	if placeholder != ""  && len(values) == 0 {
+		<option value="" disabled selected>{ placeholder }</option>
+	}
+	for key, val := range options {
+		<option value={ key } selected?={ isSelected(values, key) }>{ val }</option>
+	}
+}
+
+func isSelected(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func ParseMultiSelectFields(r *http.Request, data any) error {
+	if err := r.ParseForm(); err != nil {
+		return fmt.Errorf("failed to parse form: %v", err)
+	}
+
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		formTag := field.Tag.Get("form")
+
+		fieldVal := val.Field(i)
+		if fieldVal.Kind() == reflect.Slice {
+			formValues := r.Form[formTag]
+			if formValues == nil {
+				continue
+			}
+			if fieldVal.Type().Elem().Kind() == reflect.String {
+				slice := reflect.MakeSlice(fieldVal.Type(), len(formValues), len(formValues))
+				for j, val := range formValues {
+					slice.Index(j).SetString(val)
+				}
+				fieldVal.Set(slice)
+			} else {
+				return fmt.Errorf("unsupported slice element kind %s", fieldVal.Type().Elem().Kind())
+			}
+		}
+	}
+
+	return nil
+}

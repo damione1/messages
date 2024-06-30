@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"messages/app/db"
 	"messages/app/models"
+	component_multiSelectField "messages/app/views/components/multiSelectField"
 	"messages/app/views/messages"
 	"strconv"
 	"time"
@@ -56,9 +57,20 @@ func HandleMessageGet(kit *kit.Kit) error {
 		return errors.New("Not found")
 	}
 	// // Get the message from the database
-	dbMessage, err := models.FindMessage(kit.Request.Context(), db.Query, messageId)
+	dbMessage, err := models.Messages(
+		models.MessageWhere.ID.EQ(messageId),
+	).One(kit.Request.Context(), db.Query)
 	if err != nil {
 		return err
+	}
+
+	dbWebsites, err := models.WebsitesMessages(
+		models.WebsitesMessageWhere.MessageId.EQ(messageId),
+	).All(kit.Request.Context(), db.Query)
+
+	websites := make([]string, 0, len(dbWebsites))
+	for _, website := range dbWebsites {
+		websites = append(websites, fmt.Sprintf("%d", website.WebsiteId))
 	}
 
 	data := &messages.PageMessageEditData{
@@ -69,6 +81,7 @@ func HandleMessageGet(kit *kit.Kit) error {
 			Message:       dbMessage.Message,
 			Title:         dbMessage.Title,
 			Language:      dbMessage.Language,
+			Websites:      websites,
 		},
 		FormSettings: getBaseMessageFormSettings(kit.Request.Context()),
 		FormErrors:   v.Errors{},
@@ -83,14 +96,21 @@ var createMessageSchema = v.Schema{
 	"message":       v.Rules(v.Required),
 	"title":         v.Rules(v.Required),
 	"language":      v.Rules(v.Required),
+	"websites":      v.Rules(),
 }
 
 func HandleMessageCreate(kit *kit.Kit) error {
 	formValues := &messages.MessageFormValues{}
 	formSettings := getBaseMessageFormSettings(kit.Request.Context())
 
-	errors, ok := v.Request(kit.Request, &formValues, createMessageSchema)
+	errors, ok := v.Request(kit.Request, formValues, createMessageSchema)
 	if !ok {
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
+	}
+
+	if err := component_multiSelectField.ParseMultiSelectFields(kit.Request, formValues); err != nil {
+		// Handle error if multi-select parsing fails
+		errors.Add("_error", err.Error())
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
@@ -118,6 +138,11 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		return err
 	}
 
+	err = upsertMessageWebsites(kit.Request.Context(), &message, formValues.Websites)
+	if err != nil {
+		return err
+	}
+
 	return kit.Redirect(200, "/messages")
 }
 
@@ -134,8 +159,14 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 	}
 	formSettings := getBaseMessageFormSettings(kit.Request.Context())
 
-	errors, ok := v.Request(kit.Request, &formValues, createMessageSchema)
+	errors, ok := v.Request(kit.Request, formValues, createMessageSchema)
 	if !ok {
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
+	}
+
+	if err := component_multiSelectField.ParseMultiSelectFields(kit.Request, formValues); err != nil {
+		// Handle error if multi-select parsing fails
+		errors.Add("_error", err.Error())
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
@@ -168,7 +199,40 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 		return err
 	}
 
+	err = upsertMessageWebsites(kit.Request.Context(), message, formValues.Websites)
+	if err != nil {
+		return err
+	}
+
 	return kit.Redirect(200, "/messages")
+}
+
+func upsertMessageWebsites(ctx context.Context, message *models.Message, websites []string) error {
+	_, err := models.WebsitesMessages(
+		models.WebsitesMessageWhere.MessageId.EQ(message.ID),
+	).DeleteAll(ctx, db.Query)
+	if err != nil {
+		return err
+	}
+
+	for _, websiteId := range websites {
+		websiteIdInt, err := strconv.ParseInt(websiteId, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		websiteMessage := models.WebsitesMessage{
+			WebsiteId: websiteIdInt,
+			MessageId: message.ID,
+		}
+
+		err = websiteMessage.Insert(ctx, db.Query, boil.Infer())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func HandleMessageDelete(kit *kit.Kit) error {
@@ -179,17 +243,16 @@ func HandleMessageDelete(kit *kit.Kit) error {
 		return errors.New("Not found")
 	}
 
-	message, err := models.Messages(
+	_, err = models.Messages(
 		models.MessageWhere.ID.EQ(messageId),
-	).One(kit.Request.Context(), db.Query)
+	).DeleteAll(kit.Request.Context(), db.Query)
 	if err != nil {
 		return err
 	}
 
-	_, err = message.Delete(kit.Request.Context(), db.Query)
-	if err != nil {
-		return err
-	}
+	_, err = models.WebsitesMessages(
+		models.WebsitesMessageWhere.MessageId.EQ(messageId),
+	).DeleteAll(kit.Request.Context(), db.Query)
 
 	return kit.Redirect(200, "/messages")
 }
@@ -208,7 +271,7 @@ func getBaseMessageFormSettings(ctx context.Context) *messages.MessageFormSettin
 
 	websitesList := make(map[string]string, len(dbWebsitesList))
 	for _, website := range dbWebsitesList {
-		websitesList[strconv.FormatInt(website.ID, 10)] = fmt.Sprintf("%s (%s)", website.Name, website.URL)
+		websitesList[fmt.Sprintf("%d", website.ID)] = fmt.Sprintf("%s (%s)", website.Name, website.URL)
 	}
 	settings.Websites = websitesList
 

@@ -11,6 +11,7 @@ import (
 	"messages/app/views/components/selectField"
 	v "github.com/anthdm/superkit/validate"
 	"messages/app/views/websites"
+	"messages/app/views/components/multiSelectField"
 )
 
 type IndexPageData struct {
@@ -113,12 +114,13 @@ type MessageFormSettings struct {
 }
 
 type MessageFormValues struct {
-	ID            int64  `form:"id"`
-	Title         string `form:"title"`
-	Message       string `form:"message"`
-	Language      string `form:"language"`
-	DateRangeFrom string `form:"dateRangeFrom"`
-	DateRangeTo   string `form:"dateRangeTo"`
+	ID            int64    `form:"id"`
+	Title         string   `form:"title"`
+	Message       string   `form:"message"`
+	Language      string   `form:"language"`
+	DateRangeFrom string   `form:"dateRangeFrom"`
+	DateRangeTo   string   `form:"dateRangeTo"`
+	Websites      []string `form:"websites"`
 }
 
 templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, errors v.Errors) {
@@ -154,7 +156,6 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			Error:       "",
 			Options:     map[string]string{"fr": "French", "en": "English"},
 			Value:       values.Language,
-			Multiple:    false,
 		})
 		if errors.Has("language") {
 			<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
@@ -177,17 +178,16 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 		}
 	</div>
 	<div class="mb-4">
-		@component_selectField.SelectField(&component_selectField.SelectFieldProps{
+		@component_multiSelectField.MultiSelectField(&component_multiSelectField.MultiSelectFieldProps{
 			Label:       "Websites to display",
 			Name:        "websites",
 			Placeholder: "",
 			Error:       "",
 			Options:     settings.Websites,
-			Value:       values.Language,
-			Multiple:    true,
+			Values:      values.Websites,
 		})
-		if errors.Has("language") {
-			<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
+		if errors.Has("websites") {
+			<div class="text-red-500 text-xs">{ errors.Get("websites")[0] }</div>
 		}
 	</div>
 	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
