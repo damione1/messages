@@ -35,7 +35,7 @@ func InitializeRoutes(router *chi.Mux) {
 		app.Use(kit.WithAuthentication(authConfig, false)) // strict set to false
 
 		// Routes
-		app.Get("/api", kit.Handler(handlers.HandleApi))
+		app.Get("/api/messages/{language}", kit.Handler(handlers.HandleApi))
 	})
 
 	// Authenticated routes
