@@ -41,6 +41,7 @@ func HandleMessagesList(kit *kit.Kit) error {
 			DisplayFrom: message.DisplayFrom,
 			DisplayTo:   message.DisplayTo,
 			Language:    message.Language,
+			Type:        message.Type,
 			Status:      getMessageStatus(message),
 		})
 	}
@@ -81,6 +82,7 @@ func HandleMessageGet(kit *kit.Kit) error {
 			Message:       dbMessage.Message,
 			Title:         dbMessage.Title,
 			Language:      dbMessage.Language,
+			Type:          dbMessage.Type,
 			Websites:      websites,
 		},
 		FormSettings: getBaseMessageFormSettings(kit.Request.Context()),
@@ -96,6 +98,7 @@ var createMessageSchema = v.Schema{
 	"message":       v.Rules(v.Required),
 	"title":         v.Rules(v.Required),
 	"language":      v.Rules(v.Required),
+	"type":          v.Rules(v.Required),
 	"websites":      v.Rules(),
 }
 
@@ -114,6 +117,8 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
+	fmt.Println(formValues.Type)
+
 	displayFrom, err := time.Parse(time.RFC3339, formValues.DateRangeFrom)
 	if err != nil {
 		return err
@@ -130,6 +135,7 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		Message:     formValues.Message,
 		Title:       formValues.Title,
 		Language:    formValues.Language,
+		Type:        formValues.Type,
 		UserId:      1,
 	}
 
@@ -190,6 +196,7 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 	message.Message = formValues.Message
 	message.Title = formValues.Title
 	message.Language = formValues.Language
+	message.Type = formValues.Type
 
 	message.DisplayFrom = displayFrom
 	message.DisplayTo = displayTo

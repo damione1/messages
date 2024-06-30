@@ -14,10 +14,11 @@ import (
 type Message struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`
+	Type    string `json:"type"`
 }
 
 type Response struct {
-	Origin   string    `json:"yourDomain"`
+	Origin   string    `json:"domain"`
 	Messages []Message `json:"messages"`
 	Error    string    `json:"error,omitempty"`
 }
@@ -84,6 +85,7 @@ func HandleApi(kit *kit.Kit) error {
 		message := Message{
 			Title:   dbMessage.Title,
 			Message: dbMessage.Message,
+			Type:    dbMessage.Type,
 		}
 		if dbWebsite.Staging && dbMessage.DisplayFrom.After(time.Now()) {
 			message.Message = "[Preview] " + message.Message

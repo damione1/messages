@@ -864,6 +864,11 @@ body {
           appearance: none;
 }
 
+.columns-2 {
+  -moz-columns: 2;
+       columns: 2;
+}
+
 .flex-col {
   flex-direction: column;
 }

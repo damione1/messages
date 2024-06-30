@@ -32,6 +32,7 @@ type Message struct {
 	DisplayTo   time.Time `boil:"display_to" json:"display_to" toml:"display_to" yaml:"display_to"`
 	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	Type        string    `boil:"type" json:"type" toml:"type" yaml:"type"`
 
 	R *messageR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L messageL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,6 +48,7 @@ var MessageColumns = struct {
 	DisplayTo   string
 	CreatedAt   string
 	UpdatedAt   string
+	Type        string
 }{
 	ID:          "id",
 	Title:       "title",
@@ -57,6 +59,7 @@ var MessageColumns = struct {
 	DisplayTo:   "display_to",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
+	Type:        "type",
 }
 
 var MessageTableColumns = struct {
@@ -69,6 +72,7 @@ var MessageTableColumns = struct {
 	DisplayTo   string
 	CreatedAt   string
 	UpdatedAt   string
+	Type        string
 }{
 	ID:          "messages.id",
 	Title:       "messages.title",
@@ -79,6 +83,7 @@ var MessageTableColumns = struct {
 	DisplayTo:   "messages.display_to",
 	CreatedAt:   "messages.created_at",
 	UpdatedAt:   "messages.updated_at",
+	Type:        "messages.type",
 }
 
 // Generated where
@@ -139,6 +144,7 @@ var MessageWhere = struct {
 	DisplayTo   whereHelpertime_Time
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
+	Type        whereHelperstring
 }{
 	ID:          whereHelperint64{field: "\"messages\".\"id\""},
 	Title:       whereHelperstring{field: "\"messages\".\"title\""},
@@ -149,6 +155,7 @@ var MessageWhere = struct {
 	DisplayTo:   whereHelpertime_Time{field: "\"messages\".\"display_to\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"messages\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"messages\".\"updated_at\""},
+	Type:        whereHelperstring{field: "\"messages\".\"type\""},
 }
 
 // MessageRels is where relationship names are stored.
@@ -189,9 +196,9 @@ func (r *messageR) GetMessageIdWebsitesMessages() WebsitesMessageSlice {
 type messageL struct{}
 
 var (
-	messageAllColumns            = []string{"id", "title", "message", "language", "userId", "display_from", "display_to", "created_at", "updated_at"}
+	messageAllColumns            = []string{"id", "title", "message", "language", "userId", "display_from", "display_to", "created_at", "updated_at", "type"}
 	messageColumnsWithoutDefault = []string{"title", "message", "language", "userId", "display_from", "display_to", "created_at", "updated_at"}
-	messageColumnsWithDefault    = []string{"id"}
+	messageColumnsWithDefault    = []string{"id", "type"}
 	messagePrimaryKeyColumns     = []string{"id"}
 	messageGeneratedColumns      = []string{"id"}
 )

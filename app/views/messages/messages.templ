@@ -45,6 +45,7 @@ templ Index(data *IndexPageData) {
 						<th scope="col" class="px-6 py-3">Display to</th>
 						<th scope="col" class="px-6 py-3">Lang</th>
 						<th scope="col" class="px-6 py-3">Status</th>
+						<th scope="col" class="px-6 py-3">Type</th>
 						<th scope="col" class="px-6 py-3">Actions</th>
 					</tr>
 				</thead>
@@ -70,7 +71,7 @@ type PageMessageEditData struct {
 templ PageMessageEdit(data *PageMessageEditData) {
 	@layouts.App() {
 		<div class="text-center flex flex-col justify-center items-center lg:mt-10">
-			<form hx-patch={ string(templ.SafeURL(fmt.Sprintf("/message/%d", data.FormValues.ID))) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="outerHTML">
+			<form hx-patch={ string(templ.SafeURL(fmt.Sprintf("/message/%d", data.FormValues.ID))) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="innerHTML">
 				@MessageForm(data.FormValues, data.FormSettings, data.FormErrors)
 				<a href={ templ.SafeURL("/messages") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">Back to messages</a>
 			</form>
@@ -84,6 +85,7 @@ type MessageListItem struct {
 	DisplayFrom time.Time
 	DisplayTo   time.Time
 	Language    string
+	Type        string
 	Status      string
 }
 
@@ -100,6 +102,7 @@ templ SingleMessage(singleMessage *MessageListItem) {
 		<td class="px-6 py-4">{ singleMessage.DisplayTo.Format("2006-01-02") }</td>
 		<td class="px-6 py-4">{ singleMessage.Language }</td>
 		<td class="px-6 py-4">{ singleMessage.Status }</td>
+		<td class="px-6 py-4">{ singleMessage.Type }</td>
 		<td class="px-6 py-4">
 			<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">Edit</a>
 			@deleteConfirmationModal(singleMessage.ID)
@@ -121,6 +124,7 @@ type MessageFormValues struct {
 	DateRangeFrom string   `form:"dateRangeFrom"`
 	DateRangeTo   string   `form:"dateRangeTo"`
 	Websites      []string `form:"websites"`
+	Type          string   `form:"type"`
 }
 
 templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, errors v.Errors) {
@@ -148,18 +152,33 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			<div class="text-red-500 text-xs">{ errors.Get("message")[0] }</div>
 		}
 	</div>
-	<div class="mb-4">
-		@component_selectField.SelectField(&component_selectField.SelectFieldProps{
-			Label:       "Language",
-			Name:        "language",
-			Placeholder: "Select language",
-			Error:       "",
-			Options:     map[string]string{"fr": "French", "en": "English"},
-			Value:       values.Language,
-		})
-		if errors.Has("language") {
-			<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
-		}
+	<div class="columns-2">
+		<div class="mb-4">
+			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
+				Label:       "Language",
+				Name:        "language",
+				Placeholder: "Select language",
+				Error:       "",
+				Options:     map[string]string{"fr": "French", "en": "English"},
+				Value:       values.Language,
+			})
+			if errors.Has("language") {
+				<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
+			}
+		</div>
+		<div class="mb-4">
+			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
+				Label:       "Type",
+				Name:        "type",
+				Placeholder: "Select message type",
+				Error:       "",
+				Options:     map[string]string{"danger": "Danger", "info": "Info", "warning": "Warning"},
+				Value:       values.Type,
+			})
+			if errors.Has("type") {
+				<div class="text-red-500 text-xs">{ errors.Get("type")[0] }</div>
+			}
+		</div>
 	</div>
 	<div class="mb-4">
 		@component_daterange.Daterange(&component_daterange.DaterangeProps{
