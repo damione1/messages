@@ -120,11 +120,11 @@ type MessageFormValues struct {
 	ID            int64    `form:"id"`
 	Title         string   `form:"title"`
 	Message       string   `form:"message"`
+	Type          string   `form:"type"`
 	Language      string   `form:"language"`
 	DateRangeFrom string   `form:"dateRangeFrom"`
 	DateRangeTo   string   `form:"dateRangeTo"`
 	Websites      []string `form:"websites"`
-	Type          string   `form:"type"`
 }
 
 templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, errors v.Errors) {
@@ -155,19 +155,6 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 	<div class="columns-2">
 		<div class="mb-4">
 			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
-				Label:       "Language",
-				Name:        "language",
-				Placeholder: "Select language",
-				Error:       "",
-				Options:     map[string]string{"fr": "French", "en": "English"},
-				Value:       values.Language,
-			})
-			if errors.Has("language") {
-				<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
-			}
-		</div>
-		<div class="mb-4">
-			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
 				Label:       "Type",
 				Name:        "type",
 				Placeholder: "Select message type",
@@ -177,6 +164,19 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			})
 			if errors.Has("type") {
 				<div class="text-red-500 text-xs">{ errors.Get("type")[0] }</div>
+			}
+		</div>
+		<div class="mb-4">
+			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
+				Label:       "Language",
+				Name:        "language",
+				Placeholder: "Select language",
+				Error:       "",
+				Options:     map[string]string{"fr": "French", "en": "English"},
+				Value:       values.Language,
+			})
+			if errors.Has("language") {
+				<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
 			}
 		</div>
 	</div>

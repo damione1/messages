@@ -6,10 +6,10 @@ go 1.22.4
 // replace github.com/anthdm/superkit => ../
 
 require (
-	github.com/a-h/templ v0.2.707
-	github.com/anthdm/superkit v0.0.0-20240616155928-19996932bf4f
+	github.com/a-h/templ v0.2.731
+	github.com/anthdm/superkit v0.0.0-20240623141236-28df405fd0f3
 	github.com/friendsofgo/errors v0.9.2
-	github.com/go-chi/chi/v5 v5.0.12
+	github.com/go-chi/chi/v5 v5.1.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.22
@@ -20,11 +20,11 @@ require (
 )
 
 require (
-	github.com/gofrs/uuid v4.2.0+incompatible // indirect
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
-	github.com/gorilla/sessions v1.2.2 // indirect
-	github.com/spf13/cast v1.5.0 // indirect
+	github.com/gorilla/sessions v1.3.0 // indirect
+	github.com/spf13/cast v1.6.0 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
-	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
+	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 )

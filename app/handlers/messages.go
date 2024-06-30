@@ -34,15 +34,15 @@ func HandleMessagesList(kit *kit.Kit) error {
 	}
 
 	messagesList := make([]*messages.MessageListItem, 0, len(dbMessagesList))
-	for _, message := range dbMessagesList {
+	for _, dbMessage := range dbMessagesList {
 		messagesList = append(messagesList, &messages.MessageListItem{
-			ID:          message.ID,
-			Title:       message.Title,
-			DisplayFrom: message.DisplayFrom,
-			DisplayTo:   message.DisplayTo,
-			Language:    message.Language,
-			Type:        message.Type,
-			Status:      getMessageStatus(message),
+			ID:          dbMessage.ID,
+			Title:       dbMessage.Title,
+			DisplayFrom: dbMessage.DisplayFrom,
+			DisplayTo:   dbMessage.DisplayTo,
+			Type:        dbMessage.Type,
+			Language:    dbMessage.Language,
+			Status:      getMessageStatus(dbMessage),
 		})
 	}
 	data.MessagesList = messagesList
@@ -81,8 +81,8 @@ func HandleMessageGet(kit *kit.Kit) error {
 			DateRangeTo:   dbMessage.DisplayTo.Format(time.RFC3339),
 			Message:       dbMessage.Message,
 			Title:         dbMessage.Title,
-			Language:      dbMessage.Language,
 			Type:          dbMessage.Type,
+			Language:      dbMessage.Language,
 			Websites:      websites,
 		},
 		FormSettings: getBaseMessageFormSettings(kit.Request.Context()),
@@ -97,8 +97,8 @@ var createMessageSchema = v.Schema{
 	"dateRangeTo":   v.Rules(v.Required),
 	"message":       v.Rules(v.Required),
 	"title":         v.Rules(v.Required),
-	"language":      v.Rules(v.Required),
 	"type":          v.Rules(v.Required),
+	"language":      v.Rules(v.Required),
 	"websites":      v.Rules(),
 }
 
@@ -134,8 +134,8 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		DisplayTo:   displayTo,
 		Message:     formValues.Message,
 		Title:       formValues.Title,
-		Language:    formValues.Language,
 		Type:        formValues.Type,
+		Language:    formValues.Language,
 		UserId:      1,
 	}
 
@@ -166,13 +166,9 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 	formSettings := getBaseMessageFormSettings(kit.Request.Context())
 
 	errors, ok := v.Request(kit.Request, formValues, createMessageSchema)
-	if !ok {
-		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
-	}
 
-	if err := component_multiSelectField.ParseMultiSelectFields(kit.Request, formValues); err != nil {
-		// Handle error if multi-select parsing fails
-		errors.Add("_error", err.Error())
+	err = component_multiSelectField.ParseMultiSelectFields(kit.Request, formValues)
+	if err != nil || !ok {
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
@@ -186,27 +182,27 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 		return err
 	}
 
-	message, err := models.Messages(
+	dbmessage, err := models.Messages(
 		models.MessageWhere.ID.EQ(formValues.ID),
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {
 		return err
 	}
 
-	message.Message = formValues.Message
-	message.Title = formValues.Title
-	message.Language = formValues.Language
-	message.Type = formValues.Type
+	dbmessage.Message = formValues.Message
+	dbmessage.Title = formValues.Title
+	dbmessage.Type = formValues.Type
+	dbmessage.Language = formValues.Language
 
-	message.DisplayFrom = displayFrom
-	message.DisplayTo = displayTo
+	dbmessage.DisplayFrom = displayFrom
+	dbmessage.DisplayTo = displayTo
 
-	_, err = message.Update(kit.Request.Context(), db.Query, boil.Infer())
+	_, err = dbmessage.Update(kit.Request.Context(), db.Query, boil.Infer())
 	if err != nil {
 		return err
 	}
 
-	err = upsertMessageWebsites(kit.Request.Context(), message, formValues.Websites)
+	err = upsertMessageWebsites(kit.Request.Context(), dbmessage, formValues.Websites)
 	if err != nil {
 		return err
 	}
@@ -276,11 +272,10 @@ func getBaseMessageFormSettings(ctx context.Context) *messages.MessageFormSettin
 		return settings
 	}
 
-	websitesList := make(map[string]string, len(dbWebsitesList))
+	settings.Websites = make(map[string]string, len(dbWebsitesList))
 	for _, website := range dbWebsitesList {
-		websitesList[fmt.Sprintf("%d", website.ID)] = fmt.Sprintf("%s (%s)", website.Name, website.URL)
+		settings.Websites[fmt.Sprintf("%d", website.ID)] = fmt.Sprintf("%s (%s)", website.Name, website.URL)
 	}
-	settings.Websites = websitesList
 
 	return settings
 }
