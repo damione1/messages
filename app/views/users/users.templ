@@ -74,7 +74,7 @@ templ SingleUser(singleUser *UserListItem) {
 		<td class="px-6 py-4">{ singleUser.Email }</td>
 		<td class="px-6 py-4">{ singleUser.Role }</td>
 		<td class="px-6 py-4">
-			@deleteConfirmationModal(singleUser.ID, v.Errors{})
+			@DeleteConfirmationModal(singleUser.ID, v.Errors{})
 		</td>
 	</tr>
 }
