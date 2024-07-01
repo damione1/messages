@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/anthdm/superkit/kit"
-	"github.com/go-chi/chi/v5"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"github.com/gomarkdown/markdown"
@@ -30,7 +29,11 @@ type Response struct {
 func HandleApi(kit *kit.Kit) error {
 	request := kit.Request
 	kit.Response.Header().Set("Content-Type", "application/json")
-	lang := chi.URLParam(kit.Request, "language")
+
+	lang := request.Header.Get("Accept-Language")
+	if lang == "" {
+		lang = "en"
+	}
 
 	originDomain := request.Header.Get("Origin")
 	response := Response{

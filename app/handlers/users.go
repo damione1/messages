@@ -13,11 +13,13 @@ import (
 
 	"github.com/anthdm/superkit/kit"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func HandleUsersList(kit *kit.Kit) error {
 	data := &users.IndexPageData{
-		FormValues: &users.UserFormValues{},
+		FormValues:     &users.UserFormValues{},
+		InvitationList: make([]*users.InvitationListItem, 0),
 	}
 
 	dbUsersList, err := models.Users().All(kit.Request.Context(), db.Query)
@@ -37,18 +39,70 @@ func HandleUsersList(kit *kit.Kit) error {
 	}
 	data.UsersList = usersList
 
+	dbInvitationsList, err := models.Invitations(
+		qm.Load(models.InvitationRels.InvitedByUser),
+	).All(kit.Request.Context(), db.Query)
+	if err != nil {
+		return err
+	}
+
+	invitationsList := make([]*users.InvitationListItem, 0, len(dbInvitationsList))
+	for _, dbInvitation := range dbInvitationsList {
+		invitation := &users.InvitationListItem{
+			ID:    dbInvitation.ID,
+			Email: dbInvitation.Email,
+		}
+		if dbInvitation.R.InvitedByUser != nil {
+			invitation.InvitedBy = dbInvitation.R.InvitedByUser.FirstName + " " + dbInvitation.R.InvitedByUser.LastName
+		}
+		invitationsList = append(invitationsList, invitation)
+	}
+
+	data.InvitationList = invitationsList
+
 	return kit.Render(users.Index(data))
 }
 
 var createUserSchema = v.Schema{
-	"email": v.Rules(v.Required),
+	"email": v.Rules(v.Required, v.Email),
 }
 
-func HandleUserInvite(kit *kit.Kit) error {
+func HandleInvitationCreate(kit *kit.Kit) error {
 	auth := kit.Auth().(auth.Auth)
 	formValues := &users.UserFormValues{}
+	errors := v.Errors{}
+
+	if auth.Role != "admin" {
+		errors.Add("form", "You do not have permission to invite users")
+		return kit.Render(users.UserForm(formValues, errors))
+	}
+
 	errors, ok := v.Request(kit.Request, formValues, createUserSchema)
 	if !ok {
+		return kit.Render(users.UserForm(formValues, errors))
+	}
+
+	ok, err := models.Users(
+		models.UserWhere.Email.EQ(formValues.Email),
+	).Exists(kit.Request.Context(), db.Query)
+	if err != nil {
+		errors.Add("form", "Internal error")
+		return kit.Render(users.UserForm(formValues, errors))
+	}
+	if ok {
+		errors.Add("form", "User already exists")
+		return kit.Render(users.UserForm(formValues, errors))
+	}
+
+	ok, err = models.Invitations(
+		models.InvitationWhere.Email.EQ(formValues.Email),
+	).Exists(kit.Request.Context(), db.Query)
+	if err != nil {
+		errors.Add("form", "Internal error")
+		return kit.Render(users.UserForm(formValues, errors))
+	}
+	if ok {
+		errors.Add("form", "User already invited")
 		return kit.Render(users.UserForm(formValues, errors))
 	}
 
@@ -57,7 +111,7 @@ func HandleUserInvite(kit *kit.Kit) error {
 		InvitedBy: int64(auth.UserID),
 	}
 
-	err := invitation.Insert(kit.Request.Context(), db.Query, boil.Infer())
+	err = invitation.Insert(kit.Request.Context(), db.Query, boil.Infer())
 	if err != nil {
 		return err
 	}
@@ -72,12 +126,17 @@ func HandleUserDelete(kit *kit.Kit) error {
 	userId, err := strconv.ParseInt(chi.URLParam(kit.Request, "id"), 10, 64)
 	if err != nil {
 		errors.Add("form", "Not found")
-		return kit.Render(users.DeleteConfirmationModal(0, errors))
+		return kit.Render(users.DeleteUserConfirmationModal(0, errors))
 	}
 
 	if auth.Role != "admin" {
 		errors.Add("form", "You do not have permission to delete users")
-		return kit.Render(users.DeleteConfirmationModal(userId, errors))
+		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
+	}
+
+	if int64(auth.UserID) == userId {
+		errors.Add("form", "You cannot delete yourself")
+		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
 	}
 
 	user, err := models.Users(
@@ -85,13 +144,45 @@ func HandleUserDelete(kit *kit.Kit) error {
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {
 		errors.Add("form", "Internal error")
-		return kit.Render(users.DeleteConfirmationModal(userId, errors))
+		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
 	}
 
 	_, err = user.Delete(kit.Request.Context(), db.Query)
 	if err != nil {
 		errors.Add("form", "Internal error")
-		return kit.Render(users.DeleteConfirmationModal(userId, errors))
+		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
+	}
+
+	return kit.Redirect(200, "/users")
+}
+
+func HandleInvitationDelete(kit *kit.Kit) error {
+	errors := v.Errors{}
+	auth := kit.Auth().(auth.Auth)
+
+	if auth.Role != "admin" {
+		errors.Add("form", "You do not have permission to delete invitations")
+		return kit.Render(users.DeleteInvitationConfirmationModal(0, errors))
+	}
+
+	invitationId, err := strconv.ParseInt(chi.URLParam(kit.Request, "id"), 10, 64)
+	if err != nil {
+		errors.Add("form", "Not found")
+		return kit.Render(users.DeleteInvitationConfirmationModal(invitationId, errors))
+	}
+
+	invitation, err := models.Invitations(
+		models.InvitationWhere.ID.EQ(invitationId),
+	).One(kit.Request.Context(), db.Query)
+	if err != nil {
+		errors.Add("form", "Internal error")
+		return kit.Render(users.DeleteInvitationConfirmationModal(invitationId, errors))
+	}
+
+	_, err = invitation.Delete(kit.Request.Context(), db.Query)
+	if err != nil {
+		errors.Add("form", "Internal error")
+		return kit.Render(users.DeleteInvitationConfirmationModal(invitationId, errors))
 	}
 
 	return kit.Redirect(200, "/users")

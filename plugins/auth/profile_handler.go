@@ -20,6 +20,7 @@ type ProfileFormValues struct {
 	LastName  string `form:"lastName"`
 	Email     string
 	Success   string
+	Role      string
 }
 
 func HandleProfileShow(kit *kit.Kit) error {
@@ -37,6 +38,7 @@ func HandleProfileShow(kit *kit.Kit) error {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
+		Role:      auth.Role,
 	}
 
 	return kit.Render(ProfileShow(formValues))
@@ -59,6 +61,7 @@ func HandleProfileUpdate(kit *kit.Kit) error {
 	).UpdateAll(kit.Request.Context(), db.Query, models.M{
 		models.UserColumns.FirstName: values.FirstName,
 		models.UserColumns.LastName:  values.LastName,
+		models.UserColumns.Email:     values.Email,
 	})
 	if err != nil {
 		return err

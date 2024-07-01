@@ -35,21 +35,18 @@ The main objective of the Messages CMS is to centrally manage and dispatch infor
 
 The CMS provides an API endpoint to fetch messages dynamically.
 
-#### Endpoint: `/api/messages/{language}`
-
-- **URL Parameters:**
-
-  - `language`: The language code (e.g., `en` for English, `fr` for French).
+#### Endpoint: `/api/messages`
 
 - **Headers:**
 
-  - `Origin`: The origin of the requesting website.
+  - `Origin`: The origin domain of the requesting website.
+  - `Accept-Language`: The language code (e.g., `en` for English, `fr` for French).
 
 - **Responses:**
   - **Success (200)**
     ```json
     {
-      "domain": "http://example.com",
+      "domain": "example.com",
       "messages": [
         {
           "title": "Important Update",
@@ -63,7 +60,7 @@ The CMS provides an API endpoint to fetch messages dynamically.
   - **Error (400)**
     ```json
     {
-      "domain": "http://example.com",
+      "domain": "example.com",
       "messages": [],
       "error": "Invalid domain"
     }
@@ -96,7 +93,7 @@ The CMS provides an API endpoint to fetch messages dynamically.
 
 2. **API Request:**
 
-   - Website `http://example.com` makes a request to `/api/messages/en` with `Origin: http://example.com`.
+   - Website `http://example.com` makes a request to `/api/messages/en` with `Origin: example.com`.
    - CMS verifies the origin, fetches the relevant messages, and returns them.
 
 3. **Message Display:**
@@ -104,47 +101,30 @@ The CMS provides an API endpoint to fetch messages dynamically.
 
 By centralizing message management and using a robust API, the Messages CMS ensures consistency and efficiency in information dissemination across multiple platforms. This makes it an invaluable tool for administrators aiming to maintain uniform communication across their web properties.
 
-### Enhanced Client-side Implementation with Tailwind CSS
+### Client-side Implementation example
 
-#### HTML Structure
-
-Make sure to include Tailwind CSS in your HTML. Here's an updated structure:
+#### HTML
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Message Board</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="relative pt-16">
-    <div
-      id="message-container"
-      class="fixed top-0 inset-x-0 flex flex-col items-center space-y-4 pt-4"
-    ></div>
-
-    <script src="messages.js"></script>
-  </body>
-</html>
+<div
+  id="message-container"
+  class="fixed top-0 inset-x-0 flex flex-col items-center space-y-4 pt-4"
+></div>
 ```
 
-#### JavaScript Implementation
+#### JavaScript
 
-Now, here is the enhanced JavaScript implementation:
+JavaScript implementation example using Tailwind CSS for styling:
 
 ```javascript
 document.addEventListener("DOMContentLoaded", function () {
   const messageContainer = document.getElementById("message-container");
-  const apiUrl = `/api/messages/en`; // Change 'en' to 'fr' for French language messages
+  const apiUrl = `/api/messages`;
 
   fetch(apiUrl, {
     headers: {
-      Origin: window.location.origin,
+      Origin: window.location.origin, // Change to the origin of the requesting website
+      "Accept-Language": "en", // Change to the desired language code
     },
   })
     .then((response) => response.json())

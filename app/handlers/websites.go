@@ -3,12 +3,13 @@ package handlers
 import (
 	"errors"
 	"messages/app/db"
+	"messages/app/helpers"
 	"messages/app/models"
 	"messages/app/views/websites"
+	"messages/plugins/auth"
 	"strconv"
 
 	v "github.com/anthdm/superkit/validate"
-
 	"github.com/go-chi/chi/v5"
 
 	"github.com/anthdm/superkit/kit"
@@ -30,7 +31,7 @@ func HandleWebsitesList(kit *kit.Kit) error {
 		websitesList = append(websitesList, &websites.WebsiteListItem{
 			ID:      website.ID,
 			Name:    website.Name,
-			URL:     website.URL,
+			Domain:  website.URL,
 			Staging: website.Staging,
 		})
 	}
@@ -58,7 +59,7 @@ func HandleWebsiteGet(kit *kit.Kit) error {
 	}
 
 	data.FormValues.Name = dbWebsite.Name
-	data.FormValues.URL = dbWebsite.URL
+	data.FormValues.Domain = dbWebsite.URL
 	data.FormValues.ID = dbWebsite.ID
 	data.FormValues.Staging = dbWebsite.Staging
 
@@ -67,40 +68,55 @@ func HandleWebsiteGet(kit *kit.Kit) error {
 
 var createWebsiteSchema = v.Schema{
 	"name":    v.Rules(v.Required),
-	"URL":     v.Rules(v.Required),
+	"domain":  v.Rules(v.Required, helpers.ValidDomain),
 	"staging": v.Rules(),
 }
 
 func HandleWebsiteCreate(kit *kit.Kit) error {
 	formValues := getBaseWebsiteFormValues()
+	errors := v.Errors{}
+
+	auth := kit.Auth().(auth.Auth)
+	if auth.Role != "admin" {
+		errors.Add("form", "You are not allowed to create websites")
+		return kit.Render(websites.WebsiteForm(formValues, errors))
+	}
+
 	errors, ok := v.Request(kit.Request, &formValues, createWebsiteSchema)
 	if !ok {
 		return kit.Render(websites.WebsiteForm(formValues, errors))
 	}
 
-	website := models.Website{
+	dbWebsite := models.Website{
 		Name:    formValues.Name,
-		URL:     formValues.URL,
+		URL:     formValues.Domain,
 		Staging: formValues.Staging,
 	}
 
-	err := website.Insert(kit.Request.Context(), db.Query, boil.Infer())
+	err := dbWebsite.Insert(kit.Request.Context(), db.Query, boil.Infer())
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to create website")
+		return kit.Render(websites.WebsiteForm(formValues, errors))
 	}
 
 	return kit.Redirect(200, "/websites")
 }
 
 func HandleWebsiteUpdate(kit *kit.Kit) error {
+	formValues := getBaseWebsiteFormValues()
 	paramId := chi.URLParam(kit.Request, "id")
+	errors := v.Errors{}
+	auth := kit.Auth().(auth.Auth)
+	if auth.Role != "admin" {
+		errors.Add("form", "You are not allowed to create websites")
+		return kit.Render(websites.WebsiteForm(formValues, errors))
+	}
 
 	websiteId, err := strconv.ParseInt(paramId, 10, 64)
 	if err != nil {
-		return errors.New("Not found")
+		errors.Add("form", "Invalid website ID")
+		return kit.Render(websites.WebsiteForm(formValues, errors))
 	}
-
-	formValues := getBaseWebsiteFormValues()
 	formValues.ID = websiteId
 
 	errors, ok := v.Request(kit.Request, &formValues, createWebsiteSchema)
@@ -108,20 +124,22 @@ func HandleWebsiteUpdate(kit *kit.Kit) error {
 		return kit.Render(websites.WebsiteForm(formValues, errors))
 	}
 
-	website, err := models.Websites(
+	dbWebsite, err := models.Websites(
 		models.WebsiteWhere.ID.EQ(formValues.ID),
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		errors.Add("form", "Website not found")
+		return kit.Render(websites.WebsiteForm(formValues, errors))
 	}
 
-	website.Name = formValues.Name
-	website.URL = formValues.URL
-	website.Staging = formValues.Staging
+	dbWebsite.Name = formValues.Name
+	dbWebsite.URL = formValues.Domain
+	dbWebsite.Staging = formValues.Staging
 
-	_, err = website.Update(kit.Request.Context(), db.Query, boil.Infer())
+	_, err = dbWebsite.Update(kit.Request.Context(), db.Query, boil.Infer())
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to update website")
+		return kit.Render(websites.WebsiteForm(formValues, errors))
 	}
 
 	return kit.Redirect(200, "/websites")
@@ -129,22 +147,37 @@ func HandleWebsiteUpdate(kit *kit.Kit) error {
 
 func HandleWebsiteDelete(kit *kit.Kit) error {
 	paramId := chi.URLParam(kit.Request, "id")
+	errors := v.Errors{}
+	auth := kit.Auth().(auth.Auth)
+	confirmationModalProps := websites.GetDefaultConfirmationModalProps()
+
+	if auth.Role != "admin" {
+		errors.Add("form", "You are not allowed to delete websites")
+		confirmationModalProps.Errors = errors
+		return kit.Render(websites.ConfirmationModalContent(confirmationModalProps))
+	}
 
 	websiteId, err := strconv.ParseInt(paramId, 10, 64)
 	if err != nil {
-		return errors.New("Not found")
+		errors.Add("form", "Invalid website ID")
+		confirmationModalProps.Errors = errors
+		return kit.Render(websites.ConfirmationModalContent(confirmationModalProps))
 	}
 
 	website, err := models.Websites(
 		models.WebsiteWhere.ID.EQ(websiteId),
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		errors.Add("form", "Website not found")
+		confirmationModalProps.Errors = errors
+		return kit.Render(websites.ConfirmationModalContent(confirmationModalProps))
 	}
 
 	_, err = website.Delete(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to delete website")
+		confirmationModalProps.Errors = errors
+		return kit.Render(websites.ConfirmationModalContent(confirmationModalProps))
 	}
 
 	return kit.Redirect(200, "/websites")
@@ -152,7 +185,7 @@ func HandleWebsiteDelete(kit *kit.Kit) error {
 
 func getBaseWebsiteFormValues() websites.WebsiteFormValues {
 	return websites.WebsiteFormValues{
-		Name: "",
-		URL:  "",
+		Name:   "",
+		Domain: "",
 	}
 }

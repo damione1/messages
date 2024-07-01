@@ -98,8 +98,8 @@ var createMessageSchema = v.Schema{
 	"dateRangeTo":   v.Rules(v.Required),
 	"message":       v.Rules(v.Required),
 	"title":         v.Rules(v.Required),
-	"type":          v.Rules(v.Required),
-	"language":      v.Rules(v.Required),
+	"type":          v.Rules(v.Required, v.In([]string{"info", "warning", "danger"})),
+	"language":      v.Rules(v.Required, v.In([]string{"en", "fr"})),
 	"websites":      v.Rules(),
 }
 
@@ -261,7 +261,6 @@ func HandleMessageDelete(kit *kit.Kit) error {
 }
 
 func getBaseMessageFormSettings(ctx context.Context) *messages.MessageFormSettings {
-
 	settings := &messages.MessageFormSettings{
 		DateMin: time.Now(),
 		DateMax: time.Now().AddDate(1, 0, 0),

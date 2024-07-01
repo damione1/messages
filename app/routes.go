@@ -35,7 +35,7 @@ func InitializeRoutes(router *chi.Mux) {
 		app.Use(kit.WithAuthentication(authConfig, false)) // strict set to false
 
 		// Routes
-		app.Get("/api/messages/{language}", kit.Handler(handlers.HandleApi))
+		app.Get("/api/messages", kit.Handler(handlers.HandleApi))
 	})
 
 	// Authenticated routes
@@ -75,8 +75,10 @@ func InitializeRoutes(router *chi.Mux) {
 		app.Get("/websites", kit.Handler(handlers.HandleWebsitesList))
 
 		app.Get("/users", kit.Handler(handlers.HandleUsersList))
-		app.Delete("/user", kit.Handler(handlers.HandleUserDelete))
-		app.Post("/invite", kit.Handler(handlers.HandleUserInvite))
+		app.Delete("/user/{id}", kit.Handler(handlers.HandleUserDelete))
+
+		app.Post("/invitation", kit.Handler(handlers.HandleInvitationCreate))
+		app.Delete("/invitation/{id}", kit.Handler(handlers.HandleInvitationDelete))
 	})
 }
 
