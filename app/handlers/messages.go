@@ -8,6 +8,7 @@ import (
 	"messages/app/models"
 	component_multiSelectField "messages/app/views/components/multiSelectField"
 	"messages/app/views/messages"
+	"messages/plugins/auth"
 	"strconv"
 	"time"
 
@@ -103,6 +104,7 @@ var createMessageSchema = v.Schema{
 }
 
 func HandleMessageCreate(kit *kit.Kit) error {
+	auth := kit.Auth().(auth.Auth)
 	formValues := &messages.MessageFormValues{}
 	formSettings := getBaseMessageFormSettings(kit.Request.Context())
 
@@ -116,8 +118,6 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		errors.Add("_error", err.Error())
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
-
-	fmt.Println(formValues.Type)
 
 	displayFrom, err := time.Parse(time.RFC3339, formValues.DateRangeFrom)
 	if err != nil {
@@ -136,7 +136,7 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		Title:       formValues.Title,
 		Type:        formValues.Type,
 		Language:    formValues.Language,
-		UserId:      1,
+		UserId:      int64(auth.UserID),
 	}
 
 	err = message.Insert(kit.Request.Context(), db.Query, boil.Infer())

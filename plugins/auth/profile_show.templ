@@ -15,7 +15,7 @@ templ ProfileShow(formValues ProfileFormValues) {
 				<h1 class="text-4xl">Welcome, <span class="font-medium">{ formValues.FirstName } { formValues.LastName }</span></h1>
 				<div class="flex gap-4">
 					<a href="/" class="text-sm underline">back to home</a>
-					<button hx-delete="/logout" class="text-sm underline">sign me sout</button>
+					<button hx-delete="/logout" class="text-sm underline">sign me out</button>
 				</div>
 			</div>
 			@ProfileForm(formValues, v.Errors{})

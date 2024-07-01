@@ -73,6 +73,10 @@ func InitializeRoutes(router *chi.Mux) {
 			}))
 		})
 		app.Get("/websites", kit.Handler(handlers.HandleWebsitesList))
+
+		app.Get("/users", kit.Handler(handlers.HandleUsersList))
+		app.Delete("/user", kit.Handler(handlers.HandleUserDelete))
+		app.Post("/invite", kit.Handler(handlers.HandleUserInvite))
 	})
 }
 

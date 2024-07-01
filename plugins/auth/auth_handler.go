@@ -133,14 +133,57 @@ func HandleSignupCreate(kit *kit.Kit) error {
 	if !ok {
 		return kit.Render(SignupForm(values, errors))
 	}
+
 	if values.Password != values.PasswordConfirm {
 		errors.Add("passwordConfirm", "passwords do not match")
 		return kit.Render(SignupForm(values, errors))
 	}
-	user, err := createUserFromFormValues(values)
+
+	inviteOnly := kit.Getenv("INVITE_ONLY", "true")
+	role := "user"
+
+	ok, err := models.Users(
+		models.UserWhere.Email.EQ(values.Email),
+	).Exists(kit.Request.Context(), db.Query)
+	if err != nil {
+		errors.Add("form", "internal error")
+		return kit.Render(SignupForm(values, errors))
+	}
+	if ok {
+		errors.Add("email", "email already in use")
+		return kit.Render(SignupForm(values, errors))
+	}
+
+	if inviteOnly == "true" {
+		isInvited, err := models.Invitations(
+			models.InvitationWhere.Email.EQ(values.Email),
+		).Exists(kit.Request.Context(), db.Query)
+		if err != nil {
+			errors.Add("form", "internal error")
+			return kit.Render(SignupForm(values, errors))
+		}
+
+		if !isInvited {
+			//check if it's the first user
+			count, err := models.Users().Count(kit.Request.Context(), db.Query)
+			if err != nil {
+				errors.Add("form", "internal error")
+				return kit.Render(SignupForm(values, errors))
+			}
+			if count == 0 {
+				role = "admin"
+			} else {
+				errors.Add("email", "you need an invite to sign up")
+				return kit.Render(SignupForm(values, errors))
+			}
+		}
+	}
+
+	user, err := createUserFromFormValues(values, role)
 	if err != nil {
 		return err
 	}
+
 	return kit.Render(ConfirmEmail(user.Email))
 }
 
@@ -151,16 +194,6 @@ func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
 	if !ok {
 		return auth, nil
 	}
-
-	// var session Session
-	// err := db.Query.NewSelect().
-	// 	Model(&session).
-	// 	Relation("User").
-	// 	Where("session.token = ? AND session.expires_at > ?", token, time.Now()).
-	// 	Scan(kit.Request.Context())
-	// if err != nil {
-	// 	return auth, nil
-	// }
 
 	session, err := models.Sessions(
 		models.SessionWhere.Token.EQ(token.(string)),
@@ -179,5 +212,6 @@ func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
 		LoggedIn: true,
 		UserID:   int(session.UserID),
 		Email:    session.R.User.Email,
+		Role:     session.R.User.Role,
 	}, nil
 }
