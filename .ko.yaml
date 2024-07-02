@@ -1,6 +1,10 @@
 builds:
   - id: messages
     main: cmd/app/main.go
+    flags:
+      - -tags
+      - netgo
     ldflags:
-      - -s
-      - -w
+      - -s -w
+      - -extldflags "-static"
+      - -X main.version={{.Env.VERSION}}
