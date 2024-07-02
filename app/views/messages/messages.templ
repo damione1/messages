@@ -137,7 +137,7 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			Error:       "",
 		})
 		if errors.Has("title") {
-			<div class="text-red-500 text-xs">{ errors.Get("title")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{ errors.Get("title")[0] }</div>
 		}
 	</div>
 	<div class="mb-4">
@@ -149,7 +149,7 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			Error:       "",
 		})
 		if errors.Has("message") {
-			<div class="text-red-500 text-xs">{ errors.Get("message")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{ errors.Get("message")[0] }</div>
 		}
 	</div>
 	<div class="columns-2">
@@ -163,7 +163,7 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 				Value:       values.Type,
 			})
 			if errors.Has("type") {
-				<div class="text-red-500 text-xs">{ errors.Get("type")[0] }</div>
+				<div class="text-red-500 text-xs mt-2">{ errors.Get("type")[0] }</div>
 			}
 		</div>
 		<div class="mb-4">
@@ -176,7 +176,7 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 				Value:       values.Language,
 			})
 			if errors.Has("language") {
-				<div class="text-red-500 text-xs">{ errors.Get("language")[0] }</div>
+				<div class="text-red-500 text-xs mt-2">{ errors.Get("language")[0] }</div>
 			}
 		</div>
 	</div>
@@ -190,10 +190,10 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			DateMax:  settings.DateMax,
 		})
 		if errors.Has("dateRangeFrom") {
-			<div class="text-red-500 text-xs">Start date: { errors.Get("dateRangeFrom")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">Start date: { errors.Get("dateRangeFrom")[0] }</div>
 		}
 		if errors.Has("dateRangeTo") {
-			<div class="text-red-500 text-xs">End date:{ errors.Get("dateRangeTo")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">End date:{ errors.Get("dateRangeTo")[0] }</div>
 		}
 	</div>
 	<div class="mb-4">
@@ -206,7 +206,7 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			Values:      values.Websites,
 		})
 		if errors.Has("websites") {
-			<div class="text-red-500 text-xs">{ errors.Get("websites")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{ errors.Get("websites")[0] }</div>
 		}
 	</div>
 	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -216,6 +216,9 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			Create
 		}
 	</button>
+	if errors.Has("form") {
+		<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
+	}
 }
 
 templ deleteConfirmationModal(deleteMessageID int64) {

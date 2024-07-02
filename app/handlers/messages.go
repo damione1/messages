@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"messages/app/db"
+	"messages/app/helpers"
 	"messages/app/models"
 	component_multiSelectField "messages/app/views/components/multiSelectField"
 	"messages/app/views/messages"
@@ -13,8 +13,6 @@ import (
 	"time"
 
 	v "github.com/anthdm/superkit/validate"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/anthdm/superkit/kit"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -52,11 +50,9 @@ func HandleMessagesList(kit *kit.Kit) error {
 }
 
 func HandleMessageGet(kit *kit.Kit) error {
-	paramId := chi.URLParam(kit.Request, "id")
-
-	messageId, err := strconv.ParseInt(paramId, 10, 64)
+	messageId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {
-		return errors.New("Not found")
+		return err
 	}
 	// // Get the message from the database
 	dbMessage, err := models.Messages(
@@ -129,7 +125,7 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		return err
 	}
 
-	message := models.Message{
+	dbMessage := &models.Message{
 		DisplayFrom: displayFrom,
 		DisplayTo:   displayTo,
 		Message:     formValues.Message,
@@ -139,12 +135,12 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		UserId:      int64(auth.UserID),
 	}
 
-	err = message.Insert(kit.Request.Context(), db.Query, boil.Infer())
+	err = dbMessage.Insert(kit.Request.Context(), db.Query, boil.Infer())
 	if err != nil {
 		return err
 	}
 
-	err = upsertMessageWebsites(kit.Request.Context(), &message, formValues.Websites)
+	err = upsertMessageWebsites(kit.Request.Context(), dbMessage.ID, formValues.Websites)
 	if err != nil {
 		return err
 	}
@@ -153,19 +149,17 @@ func HandleMessageCreate(kit *kit.Kit) error {
 }
 
 func HandleMessageUpdate(kit *kit.Kit) error {
-	paramId := chi.URLParam(kit.Request, "id")
-
-	messageId, err := strconv.ParseInt(paramId, 10, 64)
+	messageId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {
-		return errors.New("Not found")
+		return err
 	}
 
 	formValues := &messages.MessageFormValues{
 		ID: messageId,
 	}
-	formSettings := getBaseMessageFormSettings(kit.Request.Context())
-
 	errors, ok := v.Request(kit.Request, formValues, createMessageSchema)
+
+	formSettings := getBaseMessageFormSettings(kit.Request.Context())
 
 	err = component_multiSelectField.ParseMultiSelectFields(kit.Request, formValues)
 	if err != nil || !ok {
@@ -174,45 +168,43 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 
 	displayFrom, err := time.Parse(time.RFC3339, formValues.DateRangeFrom)
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to parse date range from")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	displayTo, err := time.Parse(time.RFC3339, formValues.DateRangeTo)
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to parse date range to")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
-	dbmessage, err := models.Messages(
-		models.MessageWhere.ID.EQ(formValues.ID),
-	).One(kit.Request.Context(), db.Query)
+	_, err = models.Messages(
+		models.MessageWhere.ID.EQ(messageId),
+	).UpdateAll(kit.Request.Context(), db.Query, models.M{
+		models.MessageColumns.DisplayFrom: displayFrom,
+		models.MessageColumns.DisplayTo:   displayTo,
+		models.MessageColumns.Message:     formValues.Message,
+		models.MessageColumns.Title:       formValues.Title,
+		models.MessageColumns.Type:        formValues.Type,
+		models.MessageColumns.Language:    formValues.Language,
+	})
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to update message")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
-	dbmessage.Message = formValues.Message
-	dbmessage.Title = formValues.Title
-	dbmessage.Type = formValues.Type
-	dbmessage.Language = formValues.Language
-
-	dbmessage.DisplayFrom = displayFrom
-	dbmessage.DisplayTo = displayTo
-
-	_, err = dbmessage.Update(kit.Request.Context(), db.Query, boil.Infer())
+	err = upsertMessageWebsites(kit.Request.Context(), messageId, formValues.Websites)
 	if err != nil {
-		return err
-	}
-
-	err = upsertMessageWebsites(kit.Request.Context(), dbmessage, formValues.Websites)
-	if err != nil {
-		return err
+		errors.Add("form", "Failed to update message websites")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	return kit.Redirect(200, "/messages")
 }
 
-func upsertMessageWebsites(ctx context.Context, message *models.Message, websites []string) error {
+func upsertMessageWebsites(ctx context.Context, messageId int64, websites []string) error {
 	_, err := models.WebsitesMessages(
-		models.WebsitesMessageWhere.MessageId.EQ(message.ID),
+		models.WebsitesMessageWhere.MessageId.EQ(messageId),
 	).DeleteAll(ctx, db.Query)
 	if err != nil {
 		return err
@@ -224,9 +216,9 @@ func upsertMessageWebsites(ctx context.Context, message *models.Message, website
 			return err
 		}
 
-		websiteMessage := models.WebsitesMessage{
+		websiteMessage := &models.WebsitesMessage{
 			WebsiteId: websiteIdInt,
-			MessageId: message.ID,
+			MessageId: messageId,
 		}
 
 		err = websiteMessage.Insert(ctx, db.Query, boil.Infer())
@@ -239,11 +231,9 @@ func upsertMessageWebsites(ctx context.Context, message *models.Message, website
 }
 
 func HandleMessageDelete(kit *kit.Kit) error {
-	paramId := chi.URLParam(kit.Request, "id")
-
-	messageId, err := strconv.ParseInt(paramId, 10, 64)
+	messageId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {
-		return errors.New("Not found")
+		return err
 	}
 
 	_, err = models.Messages(

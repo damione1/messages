@@ -18,7 +18,7 @@ type ProfileFormValues struct {
 	ID        int    `form:"id"`
 	FirstName string `form:"firstName"`
 	LastName  string `form:"lastName"`
-	Email     string
+	Email     string `form:"email"`
 	Success   string
 	Role      string
 }
@@ -68,7 +68,6 @@ func HandleProfileUpdate(kit *kit.Kit) error {
 	}
 
 	values.Success = "Profile successfully updated!"
-	values.Email = auth.Email
 
 	return kit.Render(ProfileForm(values, v.Errors{}))
 }

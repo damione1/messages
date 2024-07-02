@@ -41,7 +41,7 @@ templ SignupForm(values SignupFormValues, errors v.Errors) {
 			<label for="email">Email *</label>
 			<input { inputAttrs(errors.Has("email"))... } name="email" id="email" value={ values.Email }/>
 			if errors.Has("email") {
-				<div class="text-red-500 text-xs">{ errors.Get("email")[0] }</div>
+				<div class="text-red-500 text-xs mt-2">{ errors.Get("email")[0] }</div>
 			}
 		</div>
 		<div class="flex flex-col gap-1">
@@ -50,7 +50,7 @@ templ SignupForm(values SignupFormValues, errors v.Errors) {
 			if errors.Has("fistName") {
 				<ul>
 					for _, err := range errors.Get("firstName") {
-						<li class="text-red-500 text-xs">{ err }</li>
+						<li class="text-red-500 text-xs mt-2">{ err }</li>
 					}
 				</ul>
 			}
@@ -61,7 +61,7 @@ templ SignupForm(values SignupFormValues, errors v.Errors) {
 			if errors.Has("lastName") {
 				<ul>
 					for _, err := range errors.Get("lastName") {
-						<li class="text-red-500 text-xs">{ err }</li>
+						<li class="text-red-500 text-xs mt-2">{ err }</li>
 					}
 				</ul>
 			}
@@ -72,7 +72,7 @@ templ SignupForm(values SignupFormValues, errors v.Errors) {
 			if errors.Has("password") {
 				<ul>
 					for _, err := range errors.Get("password") {
-						<li class="text-red-500 text-xs">{ err }</li>
+						<li class="text-red-500 text-xs mt-2">{ err }</li>
 					}
 				</ul>
 			}
@@ -81,12 +81,12 @@ templ SignupForm(values SignupFormValues, errors v.Errors) {
 			<label for="passwordConfirm">Confirm Password *</label>
 			<input { inputAttrs(errors.Has("passwordConfirm"))... } type="password" name="passwordConfirm" id="passwordConfirm"/>
 			if errors.Has("passwordConfirm") {
-				<div class="text-red-500 text-xs">{ errors.Get("passwordConfirm")[0] }</div>
+				<div class="text-red-500 text-xs mt-2">{ errors.Get("passwordConfirm")[0] }</div>
 			}
 		</div>
 		<div class="flex flex-col gap-1">
 			if errors.Has("form") {
-				<div class="text-red-500 text-xs">{ errors.Get("form")[0] }</div>
+				<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
 			}
 		</div>
 		<button { buttonAttrs()... }>

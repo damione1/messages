@@ -8,27 +8,6 @@ import (
 	v "github.com/anthdm/superkit/validate"
 )
 
-type UserListItem struct {
-	ID        int64
-	FirstName string
-	LastName  string
-	Email     string
-	Role      string
-}
-
-type InvitationListItem struct {
-	ID        int64
-	Email     string
-	InvitedBy string
-}
-
-type IndexPageData struct {
-	UsersList      []*UserListItem
-	InvitationList []*InvitationListItem
-	FormValues     *UserFormValues
-	FormErrors     v.Errors
-}
-
 templ Index(data *IndexPageData) {
 	@layouts.App() {
 		//create user button
@@ -127,10 +106,6 @@ templ singleInvitation(invitation *InvitationListItem) {
 	</tr>
 }
 
-type UserFormValues struct {
-	Email string `form:"email"`
-}
-
 templ UserForm(values *UserFormValues, errors v.Errors) {
 	<div class="mb-4">
 		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
@@ -141,14 +116,14 @@ templ UserForm(values *UserFormValues, errors v.Errors) {
 			Error:       "",
 		})
 		if errors.Has("email") {
-			<div class="text-red-500 text-xs">{ errors.Get("email")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{ errors.Get("email")[0] }</div>
 		}
 	</div>
 	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
 		Invite user
 	</button>
 	if errors.Has("form") {
-		<div class="text-red-500 text-xs">{ errors.Get("form")[0] }</div>
+		<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
 	}
 }
 
@@ -159,7 +134,7 @@ templ DeleteUserConfirmationModal(userId int64, errors v.Errors) {
 			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">Confirm delete</button>
 		</div>
 		if errors.Has("form") {
-			<div class="text-red-500 text-xs">{ errors.Get("form")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
 		}
 	</form>
 }
@@ -171,7 +146,7 @@ templ DeleteInvitationConfirmationModal(invitationId int64, errors v.Errors) {
 			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">Confirm delete</button>
 		</div>
 		if errors.Has("form") {
-			<div class="text-red-500 text-xs">{ errors.Get("form")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
 		}
 	</form>
 }

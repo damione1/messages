@@ -3,7 +3,6 @@ package auth
 import (
 	"cmp"
 	"database/sql"
-	"fmt"
 	"messages/app/db"
 	"messages/app/models"
 	"net/http"
@@ -76,9 +75,7 @@ func HandleAuthCreate(kit *kit.Kit) error {
 		return kit.Render(LoginForm(values, errors))
 	}
 
-	skipVerify := kit.Getenv("SUPERKIT_AUTH_SKIP_VERIFY", "false")
-	fmt.Println(skipVerify)
-	if skipVerify != "true" {
+	if skipVerify := kit.Getenv("SUPERKIT_AUTH_SKIP_VERIFY", "false"); skipVerify != "true" {
 		if !user.EmailVerifiedAt.Valid {
 			errors.Add("verified", "please verify your email")
 			return kit.Render(LoginForm(values, errors))
@@ -201,6 +198,10 @@ func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
 		qm.Load(models.SessionRels.User),
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {
+		return auth, nil
+	}
+
+	if session.R.User == nil {
 		return auth, nil
 	}
 	// TODO: do we really need to check if the user is verified
