@@ -6,9 +6,10 @@ import (
 	"messages/app/db"
 	"messages/app/helpers"
 	"messages/app/models"
-	component_multiSelectField "messages/app/views/components/multiSelectField"
 	"messages/app/views/messages"
 	"messages/plugins/auth"
+	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -109,7 +110,7 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
-	if err := component_multiSelectField.ParseMultiSelectFields(kit.Request, formValues); err != nil {
+	if err := parseMultiSelectFields(kit.Request, formValues); err != nil {
 		// Handle error if multi-select parsing fails
 		errors.Add("_error", err.Error())
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
@@ -161,7 +162,7 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 
 	formSettings := getBaseMessageFormSettings(kit.Request.Context())
 
-	err = component_multiSelectField.ParseMultiSelectFields(kit.Request, formValues)
+	err = parseMultiSelectFields(kit.Request, formValues)
 	if err != nil || !ok {
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
@@ -278,4 +279,35 @@ func getMessageStatus(message *models.Message) string {
 	default:
 		return messages.ActiveEnum
 	}
+}
+
+func parseMultiSelectFields(r *http.Request, data any) error {
+	if err := r.ParseForm(); err != nil {
+		return fmt.Errorf("failed to parse form: %v", err)
+	}
+
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		formTag := field.Tag.Get("form")
+
+		fieldVal := val.Field(i)
+		if fieldVal.Kind() == reflect.Slice {
+			formValues := r.Form[formTag]
+			if formValues == nil {
+				continue
+			}
+			if fieldVal.Type().Elem().Kind() == reflect.String {
+				slice := reflect.MakeSlice(fieldVal.Type(), len(formValues), len(formValues))
+				for j, val := range formValues {
+					slice.Index(j).SetString(val)
+				}
+				fieldVal.Set(slice)
+			} else {
+				return fmt.Errorf("unsupported slice element kind %s", fieldVal.Type().Elem().Kind())
+			}
+		}
+	}
+
+	return nil
 }

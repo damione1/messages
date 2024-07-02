@@ -1,11 +1,5 @@
 package component_multiSelectField
 
-import (
-	"fmt"
-	"net/http"
-	"reflect"
-)
-
 type MultiSelectFieldProps struct {
 	Label       string
 	Name        string
@@ -43,35 +37,4 @@ func isSelected(s []string, e string) bool {
 		}
 	}
 	return false
-}
-
-func ParseMultiSelectFields(r *http.Request, data any) error {
-	if err := r.ParseForm(); err != nil {
-		return fmt.Errorf("failed to parse form: %v", err)
-	}
-
-	val := reflect.ValueOf(data).Elem()
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Type().Field(i)
-		formTag := field.Tag.Get("form")
-
-		fieldVal := val.Field(i)
-		if fieldVal.Kind() == reflect.Slice {
-			formValues := r.Form[formTag]
-			if formValues == nil {
-				continue
-			}
-			if fieldVal.Type().Elem().Kind() == reflect.String {
-				slice := reflect.MakeSlice(fieldVal.Type(), len(formValues), len(formValues))
-				for j, val := range formValues {
-					slice.Index(j).SetString(val)
-				}
-				fieldVal.Set(slice)
-			} else {
-				return fmt.Errorf("unsupported slice element kind %s", fieldVal.Type().Elem().Kind())
-			}
-		}
-	}
-
-	return nil
 }
