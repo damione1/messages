@@ -1,0 +1,6 @@
+builds:
+  - id: messages
+    main: cmd/app/main.go
+    ldflags:
+      - -s
+      - -w
