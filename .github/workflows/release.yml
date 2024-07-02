@@ -1,0 +1,49 @@
+name: Publish Release YAML
+
+on:
+  release:
+    types:
+      - "created"
+
+jobs:
+  publish-release-yaml:
+    name: Publish Release YAML
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.22.4"
+
+      - uses: actions/checkout@v3
+
+      - uses: ko-build/setup-ko@v0.6
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Generate and upload release.yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag=$(echo ${{ github.ref }} | cut -c11-)  # get tag name without tags/refs/ prefix.
+          echo "Tag is: ${tag}"
+
+          # Ensure ko utility is working properly
+          ko version
+
+          # Generate release.yaml and log output for debugging
+          ko resolve -t ${tag} -f config/ > release.yaml
+          echo "Generated release.yaml"
+
+          # Check for file output
+          if [ ! -f release.yaml ]; then
+            echo "Error: release.yaml was not generated!"
+            exit 1
+          fi
+
+          # Upload the generated release.yaml to the GitHub release
+          gh release upload ${tag} release.yaml
+          echo "release.yaml uploaded successfully to release ${tag}"
