@@ -49,12 +49,6 @@ build:
 	@go build -o bin/app_prod cmd/app/main.go
 	@echo "compiled you application with all its assets to a single binary => bin/app_prod"
 
-ko-build:
-	@npx tailwindcss -i app/assets/app.css -o ./public/assets/styles.css
-	@npx esbuild app/assets/index.js --bundle --outdir=public/assets
-	@ko build cmd/app/main.go
-	@echo "compiled you application with all its assets to a single binary => bin/app_prod"
-
 db-status:
 	@GOOSE_DRIVER=$(DB_DRIVER) GOOSE_DBSTRING=$(DB_NAME) go run github.com/pressly/goose/v3/cmd/goose@latest -dir=$(MIGRATION_DIR) status
 
