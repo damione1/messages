@@ -1,8 +1,0 @@
-services:
-  messages:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    volumes:
-      - ~/.docker-conf/messages/db/:/app/db/
