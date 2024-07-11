@@ -39,6 +39,7 @@ COPY --from=builder /app/public/assets /app/public/assets
 VOLUME /app/db
 
 COPY .env.sample .env
+
 COPY Makefile Makefile
 COPY app/db/migrations app/db/migrations
 
