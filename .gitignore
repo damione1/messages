@@ -3,6 +3,6 @@ bin
 *_templ.txt
 node_modules
 tmp
-.env*
+.env
 app.db
 .DS_Store
