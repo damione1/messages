@@ -185,6 +185,8 @@ func HandleSignupCreate(kit *kit.Kit) error {
 }
 
 func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
+	loc, _ := time.LoadLocation(kit.Getenv("TIMEZONE", "America/Toronto"))
+
 	auth := Auth{}
 	sess := kit.GetSession(userSessionName)
 	token, ok := sess.Values["sessionToken"]
@@ -194,7 +196,7 @@ func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
 
 	session, err := models.Sessions(
 		models.SessionWhere.Token.EQ(token.(string)),
-		models.SessionWhere.ExpiresAt.GT(time.Now()),
+		models.SessionWhere.ExpiresAt.GT(time.Now().In(loc)),
 		qm.Load(models.SessionRels.User),
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {

@@ -27,6 +27,8 @@ type Response struct {
 }
 
 func HandleApi(kit *kit.Kit) error {
+	loc, _ := time.LoadLocation(kit.Getenv("TIMEZONE", "America/Toronto"))
+
 	request := kit.Request
 	kit.Response.Header().Set("Content-Type", "application/json")
 
@@ -39,6 +41,17 @@ func HandleApi(kit *kit.Kit) error {
 	response := Response{
 		Origin:   originDomain,
 		Messages: make([]Message, 0),
+	}
+
+	timezone := request.Header.Get("Timezone")
+	if timezone != "" {
+		var err error
+		loc, err = time.LoadLocation(timezone)
+		if err != nil {
+			response.Error = "Invalid timezone"
+			kit.JSON(400, response)
+			return nil
+		}
 	}
 
 	if !helpers.IsValidDomain(originDomain) {
@@ -78,11 +91,11 @@ func HandleApi(kit *kit.Kit) error {
 	mod := []qm.QueryMod{
 		models.MessageWhere.ID.IN(messagesIdsList),
 		models.MessageWhere.Language.EQ(lang),
-		models.MessageWhere.DisplayTo.GT(time.Now()),
+		models.MessageWhere.DisplayTo.GT(time.Now().In(loc)),
 	}
 
 	if !dbWebsite.Staging {
-		mod = append(mod, models.MessageWhere.DisplayFrom.LT(time.Now()))
+		mod = append(mod, models.MessageWhere.DisplayFrom.LT(time.Now().In(loc)))
 	}
 
 	dbMessageList, err := models.Messages(mod...).All(kit.Request.Context(), db.Query)
@@ -94,7 +107,7 @@ func HandleApi(kit *kit.Kit) error {
 			Message: string(mdToHTML([]byte(dbMessage.Message))),
 			Type:    dbMessage.Type,
 		}
-		if dbWebsite.Staging && dbMessage.DisplayFrom.After(time.Now()) {
+		if dbWebsite.Staging && dbMessage.DisplayFrom.After(time.Now().In(loc)) {
 			message.Message = "[Preview] " + message.Message
 		}
 

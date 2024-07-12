@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"messages/app/db"
 	"messages/app/helpers"
@@ -116,12 +117,12 @@ func HandleMessageCreate(kit *kit.Kit) error {
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
-	displayFrom, err := time.Parse(time.RFC3339, formValues.DateRangeFrom)
+	displayFrom, err := processTimeWithTimezone(formValues.DateRangeFrom)
 	if err != nil {
 		return err
 	}
 
-	displayTo, err := time.Parse(time.RFC3339, formValues.DateRangeTo)
+	displayTo, err := processTimeWithTimezone(formValues.DateRangeTo)
 	if err != nil {
 		return err
 	}
@@ -167,13 +168,13 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
-	displayFrom, err := time.Parse(time.RFC3339, formValues.DateRangeFrom)
+	displayFrom, err := processTimeWithTimezone(formValues.DateRangeFrom)
 	if err != nil {
 		errors.Add("form", "Failed to parse date range from")
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
-	displayTo, err := time.Parse(time.RFC3339, formValues.DateRangeTo)
+	displayTo, err := processTimeWithTimezone(formValues.DateRangeTo)
 	if err != nil {
 		errors.Add("form", "Failed to parse date range to")
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
@@ -201,6 +202,18 @@ func HandleMessageUpdate(kit *kit.Kit) error {
 	}
 
 	return kit.Redirect(200, "/messages")
+}
+
+func processTimeWithTimezone(stringValue string) (time.Time, error) {
+	loc, _ := time.LoadLocation(kit.Getenv("TIMEZONE", "America/Toronto"))
+
+	parsedDate, err := time.Parse(time.RFC3339, stringValue)
+	if err != nil {
+		return time.Time{}, errors.New("Failed to parse date range from")
+	}
+
+	return time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(),
+		parsedDate.Hour(), parsedDate.Minute(), parsedDate.Second(), parsedDate.Nanosecond(), loc), nil
 }
 
 func upsertMessageWebsites(ctx context.Context, messageId int64, websites []string) error {
@@ -252,9 +265,10 @@ func HandleMessageDelete(kit *kit.Kit) error {
 }
 
 func getBaseMessageFormSettings(ctx context.Context) *messages.MessageFormSettings {
+	loc, _ := time.LoadLocation(kit.Getenv("TIMEZONE", "UTC"))
 	settings := &messages.MessageFormSettings{
-		DateMin: time.Now(),
-		DateMax: time.Now().AddDate(1, 0, 0),
+		DateMin: time.Now().In(loc),
+		DateMax: time.Now().In(loc).AddDate(1, 0, 0),
 	}
 
 	dbWebsitesList, err := models.Websites().All(ctx, db.Query)
@@ -271,10 +285,12 @@ func getBaseMessageFormSettings(ctx context.Context) *messages.MessageFormSettin
 }
 
 func getMessageStatus(message *models.Message) string {
+	loc, _ := time.LoadLocation(kit.Getenv("TIMEZONE", "UTC"))
+	now := time.Now().In(loc)
 	switch {
-	case message.DisplayFrom.After(time.Now()):
+	case message.DisplayFrom.After(now):
 		return messages.ScheduledEnum
-	case message.DisplayTo.Before(time.Now()):
+	case message.DisplayTo.Before(now):
 		return messages.ExpiredEnum
 	default:
 		return messages.ActiveEnum

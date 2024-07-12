@@ -41,6 +41,7 @@ The CMS provides an API endpoint to fetch messages dynamically.
 
   - `Origin`: The origin domain of the requesting website.
   - `Accept-Language`: The language code (e.g., `en` for English, `fr` for French).
+  - `Timezone`: Override the timezone of the user (e.g., `Europe/Paris`).
 
 - **Responses:**
   - **Success (200)**
@@ -123,8 +124,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   fetch(apiUrl, {
     headers: {
-      Origin: window.location.origin, // Change to the origin of the requesting website
+      Origin: window.location.origin, // Change to the origin domain of the requesting website
       "Accept-Language": "en", // Change to the desired language code
+      Timezone: "Europe/Paris", // Override the timezone of the user
     },
   })
     .then((response) => response.json())
