@@ -1,0 +1,54 @@
+en:
+  locale:
+    code: "en-CA"
+    fr: French
+    en: English
+  messages:
+    btn:
+      close: Close
+      cancel: Cancel
+      create: Create message
+      edit: Edit message
+      update: Update message
+      delete: Delete message
+    table:
+      name: Name
+      from: Display from
+      to: Display to
+      language: Language
+      status: Status
+      type: Type
+      actions: Actions
+      no_messages: No messages
+    edit:
+      back: Back to messages
+    delete:
+      confirmation_msg: Are you sure you want to delete this message?
+      confirmation_btn: Confirm delete
+    form:
+      daterange:
+        label: Display range
+      title:
+        label: Message title
+        placeholder: Your message title here...
+      content:
+        label: Message content
+        placeholder: Your message content here...
+      websites:
+        label: Websites to display on
+      type:
+        label: Message type
+        placeholder: Select message type
+        values:
+          danger: Danger
+          info: Info
+          warning: Warning
+      lang:
+        label: Language
+        placeholder: Select language
+        values:
+          fr: French
+          en: English
+    errors:
+      from: "Start date: %s"
+      to: "End date: %s"

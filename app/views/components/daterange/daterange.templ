@@ -5,6 +5,7 @@ import (
 )
 
 type DaterangeProps struct {
+	Locale   string
 	Label    string
 	Name     string
 	DateFrom string
@@ -31,7 +32,7 @@ script datePickerScript(props *DaterangeProps) {
 			"https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css"
 		],
 		zIndex: 10,
-		lang: "en-CA",
+		lang: props.Locale,
 		grid: 2,
 		calendars: 2,
 		format: "YYYY-MM-DDTHH:mm:ssZ",

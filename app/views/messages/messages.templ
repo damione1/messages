@@ -12,6 +12,7 @@ import (
 	v "github.com/anthdm/superkit/validate"
 	"messages/app/views/websites"
 	"messages/app/views/components/multiSelectField"
+	"github.com/invopop/ctxi18n/i18n"
 )
 
 type IndexPageData struct {
@@ -23,13 +24,14 @@ type IndexPageData struct {
 }
 
 templ Index(data *IndexPageData) {
+
 	@layouts.App() {
 		//create message button
 		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:   "Create Message",
+				OpenButtonTxt:   i18n.T(ctx, "messages.btn.create"),
 				OpenButtonClass: "bg-blue-500 hover:bg-gray-700 bg-gray-50 light:bg-gray-200 dark:bg-gray-900 dark:text-gray-400 font-bold py-2 px-4 rounded",
-				CloseButtonTxt:  "Close",
+				CloseButtonTxt:  i18n.T(ctx, "messages.btn.close"),
 			}) {
 				<form hx-post="/message" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="innerHTML">
 					@MessageForm(data.FormValues, data.FormSettings, data.FormErrors)
@@ -40,13 +42,13 @@ templ Index(data *IndexPageData) {
 			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 					<tr>
-						<th scope="col" class="px-6 py-3">Title</th>
-						<th scope="col" class="px-6 py-3">Display from</th>
-						<th scope="col" class="px-6 py-3">Display to</th>
-						<th scope="col" class="px-6 py-3">Lang</th>
-						<th scope="col" class="px-6 py-3">Status</th>
-						<th scope="col" class="px-6 py-3">Type</th>
-						<th scope="col" class="px-6 py-3">Actions</th>
+						<th scope="col" class="px-6 py-3">{i18n.T(ctx, "messages.table.name")}</th>
+						<th scope="col" class="px-6 py-3">{i18n.T(ctx, "messages.table.from")}</th>
+						<th scope="col" class="px-6 py-3">{i18n.T(ctx, "messages.table.to")}</th>
+						<th scope="col" class="px-6 py-3">{i18n.T(ctx, "messages.table.language")}</th>
+						<th scope="col" class="px-6 py-3">{i18n.T(ctx, "messages.table.status")}</th>
+						<th scope="col" class="px-6 py-3">{i18n.T(ctx, "messages.table.type")}</th>
+						<th scope="col" class="px-6 py-3">{i18n.T(ctx, "messages.table.actions")}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -56,7 +58,7 @@ templ Index(data *IndexPageData) {
 				</tbody>
 			</table>
 			if len(data.MessagesList) == 0 {
-				<p class="text-gray-500">No messages</p>
+				<p class="text-gray-500">{i18n.T(ctx, "messages.table.no_messages")}</p>
 			}
 		</div>
 	}
@@ -73,7 +75,7 @@ templ PageMessageEdit(data *PageMessageEditData) {
 		<div class="text-center flex flex-col justify-center items-center lg:mt-10">
 			<form hx-patch={ string(templ.SafeURL(fmt.Sprintf("/message/%d", data.FormValues.ID))) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="messageForm" hx-target="#messageForm" hx-swap="innerHTML">
 				@MessageForm(data.FormValues, data.FormSettings, data.FormErrors)
-				<a href={ templ.SafeURL("/messages") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">Back to messages</a>
+				<a href={ templ.SafeURL("/messages") } class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-5">{i18n.T(ctx, "messages.edit.back")}</a>
 			</form>
 		</div>
 	}
@@ -104,7 +106,7 @@ templ SingleMessage(singleMessage *MessageListItem) {
 		<td class="px-6 py-4">{ singleMessage.Status }</td>
 		<td class="px-6 py-4">{ singleMessage.Type }</td>
 		<td class="px-6 py-4">
-			<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">Edit</a>
+			<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">{i18n.T(ctx, "messages.btn.edit")}</a>
 			@deleteConfirmationModal(singleMessage.ID)
 		</td>
 	</tr>
@@ -130,10 +132,10 @@ type MessageFormValues struct {
 templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, errors v.Errors) {
 	<div class="mb-4">
 		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
-			Label:       "Title",
+			Label:     	 i18n.T(ctx, "messages.form.title.label"),
 			Name:        "title",
 			Value:       values.Title,
-			Placeholder: "Title",
+			Placeholder: i18n.T(ctx, "messages.form.title.placeholder"),
 			Error:       "",
 		})
 		if errors.Has("title") {
@@ -142,10 +144,10 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 	</div>
 	<div class="mb-4">
 		@component_textarea.Textarea(&component_textarea.TextareaProps{
-			Label:       "Message",
+			Label:       i18n.T(ctx, "messages.form.content.label"),
 			Name:        "message",
 			Value:       values.Message,
-			Placeholder: "Message",
+			Placeholder: i18n.T(ctx, "messages.form.content.placeholder"),
 			Error:       "",
 		})
 		if errors.Has("message") {
@@ -155,11 +157,15 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 	<div class="columns-2">
 		<div class="mb-4">
 			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
-				Label:       "Type",
+				Label:       i18n.T(ctx, "messages.form.type.label"),
 				Name:        "type",
-				Placeholder: "Select message type",
+				Placeholder: i18n.T(ctx, "messages.form.type.placeholder"),
 				Error:       "",
-				Options:     map[string]string{"danger": "Danger", "info": "Info", "warning": "Warning"},
+				Options:     map[string]string{
+					"danger": i18n.T(ctx, "messages.form.type.values.danger"),
+					"info": i18n.T(ctx, "messages.form.type.values.info"),
+					"warning": i18n.T(ctx, "messages.form.type.values.warning"),
+				},
 				Value:       values.Type,
 			})
 			if errors.Has("type") {
@@ -168,11 +174,14 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 		</div>
 		<div class="mb-4">
 			@component_selectField.SelectField(&component_selectField.SelectFieldProps{
-				Label:       "Language",
+				Label:   	i18n.T(ctx, "messages.form.lang.label"),
 				Name:        "language",
-				Placeholder: "Select language",
+				Placeholder: i18n.T(ctx, "messages.form.lang.placeholder"),
 				Error:       "",
-				Options:     map[string]string{"fr": "French", "en": "English"},
+				Options:     map[string]string{
+					"fr": i18n.T(ctx, "messages.form.lang.values.fr"),
+					"en": i18n.T(ctx, "messages.form.lang.values.en"),
+				},
 				Value:       values.Language,
 			})
 			if errors.Has("language") {
@@ -182,7 +191,8 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 	</div>
 	<div class="mb-4">
 		@component_daterange.Daterange(&component_daterange.DaterangeProps{
-			Label:    "Display Date Range",
+			Locale: 	i18n.T(ctx, "locale.code"),
+			Label:   	i18n.T(ctx, "messages.form.daterange.label"),
 			Name:     "dateRange",
 			DateFrom: values.DateRangeFrom,
 			DateTo:   values.DateRangeTo,
@@ -190,15 +200,15 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 			DateMax:  settings.DateMax,
 		})
 		if errors.Has("dateRangeFrom") {
-			<div class="text-red-500 text-xs mt-2">Start date: { errors.Get("dateRangeFrom")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{i18n.T(ctx, "messages.errors.from", errors.Get("dateRangeFrom")[0])}</div>
 		}
 		if errors.Has("dateRangeTo") {
-			<div class="text-red-500 text-xs mt-2">End date:{ errors.Get("dateRangeTo")[0] }</div>
+			<div class="text-red-500 text-xs mt-2">{i18n.T(ctx, "messages.errors.to", errors.Get("dateRangeTo")[0])}</div>
 		}
 	</div>
 	<div class="mb-4">
 		@component_multiSelectField.MultiSelectField(&component_multiSelectField.MultiSelectFieldProps{
-			Label:       "Websites to display",
+			Label:       i18n.T(ctx, "messages.form.websites.label"),
 			Name:        "websites",
 			Placeholder: "",
 			Error:       "",
@@ -211,9 +221,9 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 	</div>
 	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
 		if values.ID > 0 {
-			Update
+			{i18n.T(ctx, "messages.btn.update")}
 		} else {
-			Create
+			{i18n.T(ctx, "messages.btn.create")}
 		}
 	</button>
 	if errors.Has("form") {
@@ -223,13 +233,13 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 
 templ deleteConfirmationModal(deleteMessageID int64) {
 	@component_modal.Modal(component_modal.ModalProps{
-		OpenButtonTxt:  "Delete",
-		CloseButtonTxt: "Cancel",
+		OpenButtonTxt:  i18n.T(ctx, "messages.btn.delete"),
+		CloseButtonTxt: i18n.T(ctx, "messages.btn.cancel"),
 	}) {
 		<form hx-delete={ string(fmt.Sprintf("/message/%d", deleteMessageID)) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="deleteForm" hx-target="#deleteForm" hx-swap="outerHTML">
-			<p class="block text-gray-700 text-sm font-bold mb-2">Are you sure you want to delete this message?</p>
+			<p class="block text-gray-700 text-sm font-bold mb-2">{i18n.T(ctx, "messages.delete.confirmation_msg")}</p>
 			<div class="flex items-center justify-between mt-4">
-				<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">Confirm delete</button>
+				<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">{i18n.T(ctx, "messages.delete.confirmation_btn")}</button>
 			</div>
 		</form>
 	}

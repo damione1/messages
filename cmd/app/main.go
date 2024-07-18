@@ -1,21 +1,27 @@
 package main
 
 import (
-	"messages/app"
-	"messages/public"
 	"fmt"
 	"log"
+	"messages/app"
+	"messages/app/locales"
+	"messages/public"
 	"net/http"
 	"os"
 
 	"github.com/anthdm/superkit/kit"
 	"github.com/go-chi/chi/v5"
+	"github.com/invopop/ctxi18n"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
+	}
+
+	if err := ctxi18n.LoadWithDefault(locales.LocalesFs, "en"); err != nil {
+		log.Fatalf("error loading locales with default: %v", err)
 	}
 
 	router := chi.NewMux()

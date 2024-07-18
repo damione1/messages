@@ -1,14 +1,17 @@
 package app
 
 import (
+	"log"
 	"log/slog"
 	"messages/app/handlers"
 	"messages/app/views/errors"
 	"messages/plugins/auth"
+	"net/http"
 
 	"github.com/anthdm/superkit/kit"
 	"github.com/anthdm/superkit/kit/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/invopop/ctxi18n"
 
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
@@ -17,6 +20,7 @@ import (
 func InitializeMiddleware(router *chi.Mux) {
 	router.Use(chimiddleware.Logger)
 	router.Use(chimiddleware.Recoverer)
+	router.Use(newLanguageMiddleware)
 	router.Use(middleware.WithRequestURL)
 }
 
@@ -29,6 +33,8 @@ func InitializeRoutes(router *chi.Mux) {
 		AuthFunc:    auth.AuthenticateUser,
 		RedirectURL: "/login",
 	}
+
+	router.Get("/set-language", HandleSetLanguage)
 
 	// Routes that "might" have an authenticated user
 	router.Group(func(app chi.Router) {
@@ -92,4 +98,42 @@ func NotFoundHandler(kit *kit.Kit) error {
 func ErrorHandler(kit *kit.Kit, err error) {
 	slog.Error("internal server error", "err", err.Error(), "path", kit.Request.URL.Path)
 	kit.Render(errors.Error500())
+}
+
+func newLanguageMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lang := "en" // Default language
+		cookie, err := r.Cookie("lang")
+		if err == nil {
+			lang = cookie.Value
+		}
+
+		ctx, err := ctxi18n.WithLocale(r.Context(), lang)
+		if err != nil {
+			log.Printf("error setting locale: %v", err)
+			http.Error(w, "error setting locale", http.StatusBadRequest)
+			return
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// Define this in your auth or another appropriate handler file
+func HandleSetLanguage(w http.ResponseWriter, r *http.Request) {
+	lang := r.URL.Query().Get("lang")
+	if lang == "" {
+		http.Error(w, "language query param is missing", http.StatusBadRequest)
+		return
+	}
+
+	// Set the language cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:  "lang",
+		Value: lang,
+		Path:  "/",
+		// Add any additional cookie properties, like Secure, HttpOnly, etc.
+	})
+
+	// Redirect back or handle accordingly
+	http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to home or a suitable location
 }

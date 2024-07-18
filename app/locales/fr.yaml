@@ -1,0 +1,54 @@
+fr:
+  locale:
+    code: "fr-CA"
+    fr: Français
+    en: Anglais
+  messages:
+    btn:
+      close: Fermer
+      cancel: Annuler
+      create: Créer un message
+      edit: Modifier le message
+      update: Mettre à jour le message
+      delete: Supprimer le message
+    table:
+      name: Nom
+      from: Afficher de
+      to: Afficher à
+      language: Langue
+      status: Statut
+      type: Type
+      actions: Actions
+      no_messages: Aucun message
+    edit:
+      back: Retour aux messages
+    delete:
+      confirmation_msg: Êtes-vous sûr de vouloir supprimer ce message?
+      confirmation_btn: Confirmer la suppression
+    form:
+      daterange:
+        label: Période d'affichage
+      title:
+        label: Titre du message
+        placeholder: Entrez le titre de votre message ici...
+      content:
+        label: Contenu du message
+        placeholder: Entrez le contenu de votre message ici...
+      websites:
+        label: Sites web sur lesquels afficher
+      type:
+        label: Type de message
+        placeholder: Sélectionnez le type de message
+        values:
+          danger: Danger
+          info: Info
+          warning: Avertissement
+      lang:
+        label: Langue
+        placeholder: Sélectionnez la langue
+        values:
+          fr: Français
+          en: Anglais
+    errors:
+      from: "Date de début : %s"
+      to: "Date de fin : %s"
