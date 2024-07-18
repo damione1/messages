@@ -25,7 +25,7 @@ COPY --from=asset_builder /app/public/assets /app/public/assets
 
 RUN apk add --no-cache --update git build-base
 RUN go mod tidy \
-	&& go build -o app_build cmd/app/main.go
+    && go build -o app_build cmd/app/main.go
 
 # Stage 3: Final runtime image
 FROM golang:alpine as runner
@@ -43,4 +43,6 @@ COPY .env.sample .env
 COPY Makefile Makefile
 COPY app/db/migrations app/db/migrations
 
-ENTRYPOINT ["./app_build"]
+COPY entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh", "./app_build"]
