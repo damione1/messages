@@ -19,16 +19,16 @@ templ Navigation() {
 					@component_themeswitcher.ThemeSwitcher()
 				</div>
 				<div>
-					<a href="/messages" class="text-foreground">Messages</a>
+					<a href="/messages" class="text-foreground">{i18n.T(ctx, "navigation.messages")}</a>
 				</div>
 				<div>
-					<a href="/websites" class="text-foreground">Websites</a>
+					<a href="/websites" class="text-foreground">{i18n.T(ctx, "navigation.websites")}</a>
 				</div>
 				<div>
-					<a href="/users" class="text-foreground">Users</a>
+					<a href="/users" class="text-foreground">{i18n.T(ctx, "navigation.users")}</a>
 				</div>
 				<div>
-					<a href="/profile" class="text-foreground">Profile</a>
+					<a href="/profile" class="text-foreground">{i18n.T(ctx, "navigation.profile")}</a>
 				</div>
 				<div>
 					@languageSwitcher(locales.LanguageList, i18n.GetLocale(ctx).Code().String())

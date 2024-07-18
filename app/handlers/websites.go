@@ -129,7 +129,7 @@ func HandleWebsiteUpdate(kit *kit.Kit) error {
 
 func HandleWebsiteDelete(kit *kit.Kit) error {
 	errors := v.Errors{}
-	confirmationModalProps := websites.GetDefaultConfirmationModalProps()
+	confirmationModalProps := websites.GetDefaultConfirmationModalProps(kit.Request.Context())
 
 	websiteId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {

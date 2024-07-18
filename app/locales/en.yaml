@@ -3,6 +3,44 @@ en:
     code: "en-CA"
     fr: French
     en: English
+
+  navigation:
+    messages: Messages
+    websites: Websites
+    users: Users
+    profile: Profile
+
+  websites:
+    name: Name
+    domain: Domain
+    is_staging: Is staging?
+    no: No
+    yes: Yes
+    no_websites: No website yet
+    action:
+      title: Action
+      edit: Edit website
+      delete: Delete website
+      close: Close
+    modal:
+      delete:
+        title: Delete website
+        message: Are you sure ?
+        btn: Delete
+    btn:
+      create: Add a website
+      update: Update website
+      back: Back to websites
+    form:
+      name:
+        label: Name
+        placeholder: name
+      domain:
+        label: Domain
+        placeholder: example.com
+      staging:
+        label: Is staging?
+
   messages:
     btn:
       close: Close

@@ -3,6 +3,44 @@ fr:
     code: "fr-CA"
     fr: Français
     en: Anglais
+
+  navigation:
+    messages: Messages
+    websites: Domaines
+    users: Utilisateurs
+    profile: Profils
+
+  websites:
+    name: Nom
+    domain: Domaine
+    is_staging: En beta ?
+    no: Non
+    yes: Oui
+    no_websites: Pas encore de site web
+    action:
+      title: Action
+      edit: Modifier le site web
+      delete: Supprimer le site web
+      close: Fermer
+    modal:
+      delete:
+        title: Supprimer le site web
+        message: Êtes-vous sûr ?
+        btn: Supprimer
+    btn:
+      create: Ajouter un site web
+      update: Mettre à jour le site web
+      back: Retour aux sites web
+    form:
+      name:
+        label: Nom
+        placeholder: nom
+      domain:
+        label: Domaine
+        placeholder: exemple.com
+      staging:
+        label: En beta ?
+
   messages:
     btn:
       close: Fermer
