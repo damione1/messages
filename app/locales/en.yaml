@@ -1,0 +1,143 @@
+en:
+  locale:
+    code: "en-CA"
+    fr: French
+    en: English
+
+  navigation:
+    messages: Messages
+    websites: Websites
+    users: Users
+    profile: Profile
+
+  profile:
+    welcome: Welcome,
+    back_to_home: Back to home
+    sign_out: Sign me out
+    role: Role
+    firstName: First Name
+    lastName: Last Name
+    email: Email
+    update: Update
+    success: Profile updated successfully
+
+  users:
+    invite: Invite user
+    close: Close
+    invitations: Invitations
+    users: Users
+    email: Email
+    invited_by: Invited by
+    actions: Actions
+    first_name: First Name
+    last_name: Last Name
+    role: Role
+    no_users: No users
+    delete: Delete
+    cancel: Cancel
+    email_placeholder: example@email.com
+    invite_user: Invite user
+    delete_user_confirmation: Are you sure you want to delete this user?
+    confirm_delete: Confirm delete
+    delete_invitation_confirmation: Are you sure you want to delete this invitation?
+
+  auth:
+    signup_link: Don't have an account? Signup here.
+    form:
+      email: Email
+      password: Password
+      password_err: "Password:"
+      login_btn: Log in
+
+  signup:
+    signup: Signup
+    signup_btn: Signup
+    existing_account: Already have an account? Login here.
+    confirm_email: "An email confirmation link has been sent to:"
+    form:
+      email: Email
+      first_name: First Name
+      last_name: Last Name
+      password: Password
+      confirm_password: Confirm Password
+
+  websites:
+    name: Name
+    domain: Domain
+    is_staging: Is staging?
+    no: No
+    yes: Yes
+    no_websites: No website yet
+    action:
+      title: Action
+      edit: Edit website
+      delete: Delete website
+      close: Close
+    modal:
+      delete:
+        title: Delete website
+        message: Are you sure ?
+        btn: Delete
+    btn:
+      create: Add a website
+      update: Update website
+      back: Back to websites
+    form:
+      name:
+        label: Name
+        placeholder: name
+      domain:
+        label: Domain
+        placeholder: example.com
+      staging:
+        label: Is staging?
+
+  messages:
+    btn:
+      close: Close
+      cancel: Cancel
+      create: Create message
+      edit: Edit message
+      update: Update message
+      delete: Delete message
+    table:
+      name: Name
+      from: Display from
+      to: Display to
+      language: Language
+      status: Status
+      type: Type
+      actions: Actions
+      no_messages: No messages
+    edit:
+      back: Back to messages
+    delete:
+      confirmation_msg: Are you sure you want to delete this message?
+      confirmation_btn: Confirm delete
+    form:
+      daterange:
+        label: Display range
+      title:
+        label: Message title
+        placeholder: Your message title here...
+      content:
+        label: Message content
+        placeholder: Your message content here...
+      websites:
+        label: Websites to display on
+      type:
+        label: Message type
+        placeholder: Select message type
+        values:
+          danger: Danger
+          info: Info
+          warning: Warning
+      lang:
+        label: Language
+        placeholder: Select language
+        values:
+          fr: French
+          en: English
+    errors:
+      from: "Start date: %s"
+      to: "End date: %s"

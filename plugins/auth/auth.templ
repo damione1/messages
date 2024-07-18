@@ -5,6 +5,8 @@ import (
 
 	"messages/app/views/layouts"
 	"messages/app/views/components/themeswitcher"
+	"messages/app/views/components/navigation"
+	"github.com/invopop/ctxi18n/i18n"
 )
 
 type AuthIndexPageData struct {
@@ -25,9 +27,9 @@ templ AuthIndex(data AuthIndexPageData) {
 		<div class="w-full justify-center gap-10">
 			<div class="mt-10 lg:mt-40">
 				<div class="max-w-sm mx-auto border rounded-md shadow-sm py-12 px-8 flex flex-col gap-8">
-					<h2 class="text-center text-2xl font-medium">Messages</h2>
+					<h2 class="text-center text-2xl font-medium">{component_navigation.GetAppName()}</h2>
 					@LoginForm(data.FormValues, data.FormErrors)
-					<a class="text-sm underline" href="/signup">Don't have an account? Signup here.</a>
+					<a class="text-sm underline" href="/signup">{i18n.T(ctx, "auth.signup_link")}</a>
 				</div>
 			</div>
 		</div>
@@ -37,19 +39,19 @@ templ AuthIndex(data AuthIndexPageData) {
 templ LoginForm(values LoginFormValues, errors v.Errors) {
 	<form hx-post="/login" class="flex flex-col gap-4">
 		<div class="flex flex-col gap-1">
-			<label for="email">Email *</label>
+			<label for="email">{i18n.T(ctx, "auth.form.email")} *</label>
 			<input { inputAttrs(errors.Has("email"))... } name="email" id="email" value={ values.Email }/>
 			if errors.Has("email") {
 				<div class="text-red-500 text-xs mt-2">{ errors.Get("email")[0] }</div>
 			}
 		</div>
 		<div class="flex flex-col gap-1">
-			<label for="password">Password *</label>
+			<label for="password">{i18n.T(ctx, "auth.form.password")} *</label>
 			<input { inputAttrs(errors.Has("password"))... } type="password" name="password" id="password"/>
 			if errors.Has("password") {
 				<ul class="list-disc ml-4">
 					for _, err := range errors.Get("password") {
-						<li class="text-red-500 text-xs mt-2">password { err }</li>
+						<li class="text-red-500 text-xs mt-2">{i18n.T(ctx, "auth.form.password_err")} { err }</li>
 					}
 				</ul>
 			}
@@ -61,7 +63,7 @@ templ LoginForm(values LoginFormValues, errors v.Errors) {
 			}
 		</div>
 		<button { buttonAttrs()... }>
-			Login
+			{i18n.T(ctx, "auth.form.login_btn")}
 		</button>
 	</form>
 }

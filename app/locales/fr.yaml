@@ -1,0 +1,143 @@
+fr:
+  locale:
+    code: "fr-CA"
+    fr: Français
+    en: Anglais
+
+  navigation:
+    messages: Messages
+    websites: Domaines
+    users: Utilisateurs
+    profile: Profil
+
+  profile:
+    welcome: Bienvenue,
+    back_to_home: Retour à l'accueil
+    sign_out: Déconnexion
+    role: Rôle
+    firstName: Prénom
+    lastName: Nom de famille
+    email: E-mail
+    update: Mettre à jour
+    success: Profil mis à jour avec succès
+
+  users:
+    invite: Inviter un utilisateur
+    close: Fermer
+    invitations: Invitations
+    users: Utilisateurs
+    email: E-mail
+    invited_by: Invité par
+    actions: Actions
+    first_name: Prénom
+    last_name: Nom de famille
+    role: Rôle
+    no_users: Aucun utilisateur
+    delete: Supprimer
+    cancel: Annuler
+    email_placeholder: exemple@email.com
+    invite_user: Inviter un utilisateur
+    delete_user_confirmation: Êtes-vous sûr de vouloir supprimer cet utilisateur ?
+    confirm_delete: Confirmer la suppression
+    delete_invitation_confirmation: Êtes-vous sûr de vouloir supprimer cette invitation ?
+
+  auth:
+    signup_link: Inscription
+    form:
+      email: E-mail
+      password: Mot de passe
+      password_err: "Erreur :"
+      login_btn: Se connecter
+
+  signup:
+    signup: S'inscrire
+    signup_btn: S'inscrire
+    existing_account: Vous avez déjà un compte ? Connectez-vous ici.
+    confirm_email: "Un lien de confirmation a été envoyé à l'adresse :"
+    form:
+      email: E-mail
+      first_name: Prénom
+      last_name: Nom de famille
+      password: Mot de passe
+      confirm_password: Confirmer le mot de passe
+
+  websites:
+    name: Nom
+    domain: Domaine
+    is_staging: En beta ?
+    no: Non
+    yes: Oui
+    no_websites: Pas encore de site web
+    action:
+      title: Action
+      edit: Modifier le site web
+      delete: Supprimer le site web
+      close: Fermer
+    modal:
+      delete:
+        title: Supprimer le site web
+        message: Êtes-vous sûr ?
+        btn: Supprimer
+    btn:
+      create: Ajouter un site web
+      update: Mettre à jour le site web
+      back: Retour aux sites web
+    form:
+      name:
+        label: Nom
+        placeholder: nom
+      domain:
+        label: Domaine
+        placeholder: exemple.com
+      staging:
+        label: En beta ?
+
+  messages:
+    btn:
+      close: Fermer
+      cancel: Annuler
+      create: Créer un message
+      edit: Modifier le message
+      update: Mettre à jour le message
+      delete: Supprimer le message
+    table:
+      name: Nom
+      from: Afficher de
+      to: Afficher à
+      language: Langue
+      status: Statut
+      type: Type
+      actions: Actions
+      no_messages: Aucun message
+    edit:
+      back: Retour aux messages
+    delete:
+      confirmation_msg: Êtes-vous sûr de vouloir supprimer ce message?
+      confirmation_btn: Confirmer la suppression
+    form:
+      daterange:
+        label: Période d'affichage
+      title:
+        label: Titre du message
+        placeholder: Entrez le titre de votre message ici...
+      content:
+        label: Contenu du message
+        placeholder: Entrez le contenu de votre message ici...
+      websites:
+        label: Sites web sur lesquels afficher
+      type:
+        label: Type de message
+        placeholder: Sélectionnez le type de message
+        values:
+          danger: Danger
+          info: Info
+          warning: Avertissement
+      lang:
+        label: Langue
+        placeholder: Sélectionnez la langue
+        values:
+          fr: Français
+          en: Anglais
+    errors:
+      from: "Date de début : %s"
+      to: "Date de fin : %s"

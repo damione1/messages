@@ -15,6 +15,7 @@ import (
 )
 
 type DaterangeProps struct {
+	Locale   string
 	Label    string
 	Name     string
 	DateFrom string
@@ -43,7 +44,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 18, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 19, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -56,7 +57,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 18, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 19, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -69,7 +70,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name + "From")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 19, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 20, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -82,7 +83,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name + "From")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 19, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 20, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -95,7 +96,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.DateFrom)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 19, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 20, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -108,7 +109,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name + "To")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 20, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 21, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -121,7 +122,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name + "To")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 20, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 21, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -134,7 +135,7 @@ func Daterange(props *DaterangeProps) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.DateTo)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 20, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/daterange/daterange.templ`, Line: 21, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -157,8 +158,8 @@ func Daterange(props *DaterangeProps) templ.Component {
 
 func datePickerScript(props *DaterangeProps) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_datePickerScript_149b`,
-		Function: `function __templ_datePickerScript_149b(props){const fromInput = document.getElementById(props.Name + "From");
+		Name: `__templ_datePickerScript_46dc`,
+		Function: `function __templ_datePickerScript_46dc(props){const fromInput = document.getElementById(props.Name + "From");
 	const toInput = document.getElementById(props.Name + "To");
 	const picker = new easepick.create({
 		element: "#" + props.Name + "From",
@@ -166,7 +167,7 @@ func datePickerScript(props *DaterangeProps) templ.ComponentScript {
 			"https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css"
 		],
 		zIndex: 10,
-		lang: "en-CA",
+		lang: props.Locale,
 		grid: 2,
 		calendars: 2,
 		format: "YYYY-MM-DDTHH:mm:ssZ",
@@ -194,7 +195,7 @@ func datePickerScript(props *DaterangeProps) templ.ComponentScript {
   		},
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_datePickerScript_149b`, props),
-		CallInline: templ.SafeScriptInline(`__templ_datePickerScript_149b`, props),
+		Call:       templ.SafeScript(`__templ_datePickerScript_46dc`, props),
+		CallInline: templ.SafeScriptInline(`__templ_datePickerScript_46dc`, props),
 	}
 }

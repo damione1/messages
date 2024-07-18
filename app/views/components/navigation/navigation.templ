@@ -3,39 +3,53 @@ package component_navigation
 import (
 	"messages/app/views/components/themeswitcher"
 	"os"
+	"fmt"
+	"messages/app/locales"
+	"github.com/invopop/ctxi18n/i18n"
 )
 
 templ Navigation() {
 	<nav class="border-b py-3">
 		<div class="container mx-auto flex justify-between">
 			<div class="text-lg text-foreground">
-				<a href="/messages" class="font-semibold uppercase">{ getAppName() }</a>
+				<a href="/messages" class="font-semibold uppercase">{ GetAppName() }</a>
 			</div>
 			<div class="flex gap-4 items-center">
 				<div>
 					@component_themeswitcher.ThemeSwitcher()
 				</div>
 				<div>
-					<a href="/messages" class="text-foreground">Messages</a>
+					<a href="/messages" class="text-foreground">{i18n.T(ctx, "navigation.messages")}</a>
 				</div>
 				<div>
-					<a href="/websites" class="text-foreground">Websites</a>
+					<a href="/websites" class="text-foreground">{i18n.T(ctx, "navigation.websites")}</a>
 				</div>
 				<div>
-					<a href="/users" class="text-foreground">Users</a>
+					<a href="/users" class="text-foreground">{i18n.T(ctx, "navigation.users")}</a>
 				</div>
 				<div>
-					<a href="/profile" class="text-foreground">Profile</a>
+					<a href="/profile" class="text-foreground">{i18n.T(ctx, "navigation.profile")}</a>
+				</div>
+				<div>
+					@LanguageSwitcher(locales.LanguageList, i18n.GetLocale(ctx).Code().String())
 				</div>
 			</div>
 		</div>
 	</nav>
 }
 
-func getAppName() string {
+func GetAppName() string {
 	if appName := os.Getenv("APP_NAME"); appName != "" {
 		return appName
 	} else {
 		return "Messages"
 	}
+}
+
+templ LanguageSwitcher(languageList []string, currentLanguage string){
+	<select hx-get="/set-language" hx-include="closest nav" hx-trigger="change" name="lang" class="text-lg text-foreground bg-transparent">
+		for _, languageCode := range languageList {
+			<option value={languageCode} selected?={languageCode == currentLanguage} class="text-lg text-white">{i18n.T(ctx, fmt.Sprintf("locale.%s", languageCode))}</option>
+		}
+	</select>
 }
