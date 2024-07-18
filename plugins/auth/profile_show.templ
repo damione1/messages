@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	v "github.com/anthdm/superkit/validate"
-
+	"github.com/invopop/ctxi18n/i18n"
 	"messages/app/views/layouts"
 )
 
@@ -12,14 +12,14 @@ templ ProfileShow(formValues ProfileFormValues) {
 	@layouts.App() {
 		<div class="mt-32 flex flex-col gap-12">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-4xl">Welcome, <span class="font-medium">{ formValues.FirstName } { formValues.LastName }</span></h1>
+				<h1 class="text-4xl">{i18n.T(ctx, "profile.welcome")} <span class="font-medium">{ formValues.FirstName } { formValues.LastName }</span></h1>
 				<div class="flex gap-4">
-					<a href="/" class="text-sm underline">back to home</a>
-					<button hx-delete="/logout" class="text-sm underline">sign me out</button>
+					<a href="/" class="text-sm underline">{i18n.T(ctx, "profile.back_to_home")}</a>
+					<button hx-delete="/logout" class="text-sm underline">{i18n.T(ctx, "profile.sign_out")}</button>
 				</div>
 				//role
 				<div class="flex flex-col gap-2">
-					Role: { formValues.Role }
+					{i18n.T(ctx, "profile.role")}: { formValues.Role }
 				</div>
 			</div>
 			@ProfileForm(formValues, v.Errors{})
@@ -31,27 +31,27 @@ templ ProfileForm(values ProfileFormValues, errors v.Errors) {
 	<form hx-put="/profile" class="w-full max-w-sm flex flex-col gap-6">
 		<input type="hidden" name="id" value={ fmt.Sprint(values.ID) }/>
 		<div class="flex flex-col gap-2">
-			<label for="firstName">First Name</label>
+			<label for="firstName">{i18n.T(ctx, "profile.firstName")}</label>
 			<input { inputAttrs(errors.Has("firstName"))... } name="firstName" id="firstName" value={ values.FirstName }/>
 			if errors.Has("firstName") {
 				<div class="text-red-500 text-xs mt-2">{ errors.Get("firstName")[0] }</div>
 			}
 		</div>
 		<div class="flex flex-col gap-2">
-			<label for="lastName">Last Name</label>
+			<label for="lastName">{i18n.T(ctx, "profile.lastName")}</label>
 			<input { inputAttrs(errors.Has("lastName"))... } name="lastName" id="lastName" value={ values.LastName }/>
 			if errors.Has("lastName") {
 				<div class="text-red-500 text-xs mt-2">{ errors.Get("lastName")[0] }</div>
 			}
 		</div>
 		<div class="flex flex-col gap-2">
-			<label for="email">Email</label>
+			<label for="email">{i18n.T(ctx, "profile.email")}</label>
 			<input { inputAttrs(errors.Has("email"))... } name="email" id="email" value={ values.Email }/>
 			if errors.Has("email") {
 				<div class="text-red-500 text-xs mt-2">{ errors.Get("email")[0] }</div>
 			}
 		</div>
-		<button { buttonAttrs()... }>Update profile</button>
+		<button { buttonAttrs()... }>{i18n.T(ctx, "profile.update")}</button>
 		if len(values.Success) > 0 {
 			<div>{ values.Success }</div>
 		}

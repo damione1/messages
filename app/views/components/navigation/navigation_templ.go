@@ -36,7 +36,7 @@ func Navigation() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getAppName())
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(GetAppName())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `app/views/components/navigation/navigation.templ`, Line: 15, Col: 70}
 		}
@@ -108,7 +108,7 @@ func Navigation() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = languageSwitcher(locales.LanguageList, i18n.GetLocale(ctx).Code().String()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = LanguageSwitcher(locales.LanguageList, i18n.GetLocale(ctx).Code().String()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -123,7 +123,7 @@ func Navigation() templ.Component {
 	})
 }
 
-func getAppName() string {
+func GetAppName() string {
 	if appName := os.Getenv("APP_NAME"); appName != "" {
 		return appName
 	} else {
@@ -131,7 +131,7 @@ func getAppName() string {
 	}
 }
 
-func languageSwitcher(languageList []string, currentLanguage string) templ.Component {
+func LanguageSwitcher(languageList []string, currentLanguage string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

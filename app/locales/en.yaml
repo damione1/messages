@@ -10,6 +10,57 @@ en:
     users: Users
     profile: Profile
 
+  profile:
+    welcome: Welcome,
+    back_to_home: Back to home
+    sign_out: Sign me out
+    role: Role
+    firstName: First Name
+    lastName: Last Name
+    email: Email
+    update: Update
+    success: Profile updated successfully
+
+  users:
+    invite: Invite user
+    close: Close
+    invitations: Invitations
+    users: Users
+    email: Email
+    invited_by: Invited by
+    actions: Actions
+    first_name: First Name
+    last_name: Last Name
+    role: Role
+    no_users: No users
+    delete: Delete
+    cancel: Cancel
+    email_placeholder: example@email.com
+    invite_user: Invite user
+    delete_user_confirmation: Are you sure you want to delete this user?
+    confirm_delete: Confirm delete
+    delete_invitation_confirmation: Are you sure you want to delete this invitation?
+
+  auth:
+    signup_link: Don't have an account? Signup here.
+    form:
+      email: Email
+      password: Password
+      password_err: "Password:"
+      login_btn: Log in
+
+  signup:
+    signup: Signup
+    signup_btn: Signup
+    existing_account: Already have an account? Login here.
+    confirm_email: "An email confirmation link has been sent to:"
+    form:
+      email: Email
+      first_name: First Name
+      last_name: Last Name
+      password: Password
+      confirm_password: Confirm Password
+
   websites:
     name: Name
     domain: Domain

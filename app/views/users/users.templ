@@ -1,11 +1,12 @@
 package users
 
 import (
-	"messages/app/views/layouts"
 	"fmt"
-	"messages/app/views/components/modal"
-	"messages/app/views/components/inputField"
 	v "github.com/anthdm/superkit/validate"
+	"messages/app/views/components/inputField"
+	"messages/app/views/components/modal"
+	"messages/app/views/layouts"
+	"github.com/invopop/ctxi18n/i18n"
 )
 
 templ Index(data *IndexPageData) {
@@ -13,9 +14,9 @@ templ Index(data *IndexPageData) {
 		//create user button
 		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:   "Invite user",
+				OpenButtonTxt:   i18n.T(ctx, "users.invite"),
 				OpenButtonClass: "bg-blue-500 hover:bg-gray-700 bg-gray-50 light:bg-gray-200 dark:bg-gray-900 dark:text-gray-400 font-bold py-2 px-4 rounded",
-				CloseButtonTxt:  "Close",
+				CloseButtonTxt:  i18n.T(ctx, "users.close"),
 			}) {
 				<form hx-post="/invitation" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="userForm" hx-target="#userForm" hx-swap="innerHTML">
 					@UserForm(data.FormValues, data.FormErrors)
@@ -23,10 +24,10 @@ templ Index(data *IndexPageData) {
 			}
 		</div>
 		if len(data.InvitationList) > 0 {
-			<h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-400">Invitations</h2>
+			<h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-400">{i18n.T(ctx, "users.invitations")}</h2>
 			@invitationsListing(data.InvitationList)
 		}
-		<h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-400 mt-10">Users</h2>
+		<h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-400 mt-10">{i18n.T(ctx, "users.users")}</h2>
 		@usersListing(data.UsersList)
 	}
 }
@@ -36,9 +37,9 @@ templ invitationsListing(invitations []*InvitationListItem) {
 		<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 			<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 				<tr>
-					<th scope="col" class="px-6 py-3">Email</th>
-					<th scope="col" class="px-6 py-3">Invited by</th>
-					<th scope="col" class="px-6 py-3">Actions</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.email")}</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.invited_by")}</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.actions")}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -55,11 +56,11 @@ templ usersListing(users []*UserListItem) {
 		<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 			<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 				<tr>
-					<th scope="col" class="px-6 py-3">First Name</th>
-					<th scope="col" class="px-6 py-3">Last Name</th>
-					<th scope="col" class="px-6 py-3">Email</th>
-					<th scope="col" class="px-6 py-3">Role</th>
-					<th scope="col" class="px-6 py-3">Actions</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.first_name")}</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.last_name")}</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.email")}</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.role")}</th>
+					<th scope="col" class="px-6 py-3">{i18n.T(ctx, "users.actions")}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -69,7 +70,7 @@ templ usersListing(users []*UserListItem) {
 			</tbody>
 		</table>
 		if len(users) == 0 {
-			<p class="text-gray-500">No users</p>
+			<p class="text-gray-500">{i18n.T(ctx, "users.no_users")}</p>
 		}
 	</div>
 }
@@ -82,8 +83,8 @@ templ singleUser(user *UserListItem) {
 		<td class="px-6 py-4">{ user.Role }</td>
 		<td class="px-6 py-4">
 			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:  "Delete",
-				CloseButtonTxt: "Cancel",
+				OpenButtonTxt:  i18n.T(ctx, "users.delete"),
+				CloseButtonTxt: i18n.T(ctx, "users.cancel"),
 			}) {
 				@DeleteUserConfirmationModal(user.ID, v.Errors{})
 			}
@@ -97,8 +98,8 @@ templ singleInvitation(invitation *InvitationListItem) {
 		<td class="px-6 py-4">{ invitation.InvitedBy }</td>
 		<td class="px-6 py-4">
 			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:  "Delete",
-				CloseButtonTxt: "Cancel",
+				OpenButtonTxt:  i18n.T(ctx, "users.delete"),
+				CloseButtonTxt: i18n.T(ctx, "users.cancel"),
 			}) {
 				@DeleteInvitationConfirmationModal(invitation.ID, v.Errors{})
 			}
@@ -109,10 +110,10 @@ templ singleInvitation(invitation *InvitationListItem) {
 templ UserForm(values *UserFormValues, errors v.Errors) {
 	<div class="mb-4">
 		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
-			Label:       "Email",
+			Label:       i18n.T(ctx, "users.email"),
 			Name:        "email",
 			Value:       "",
-			Placeholder: "example@email.com",
+			Placeholder: i18n.T(ctx, "users.email_placeholder"),
 			Error:       "",
 		})
 		if errors.Has("email") {
@@ -120,7 +121,7 @@ templ UserForm(values *UserFormValues, errors v.Errors) {
 		}
 	</div>
 	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-		Invite user
+		{i18n.T(ctx, "users.invite_user")}
 	</button>
 	if errors.Has("form") {
 		<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
@@ -129,9 +130,9 @@ templ UserForm(values *UserFormValues, errors v.Errors) {
 
 templ DeleteUserConfirmationModal(userId int64, errors v.Errors) {
 	<form hx-delete={ fmt.Sprintf("/user/%d", userId) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id={ fmt.Sprintf("deleteUserModal%d", userId) } hx-target={ fmt.Sprintf("#deleteUserModal%d", userId) } hx-swap="outerHTML">
-		<p class="block text-gray-700 text-sm font-bold mb-2">Are you sure you want to delete this user?</p>
+		<p class="block text-gray-700 text-sm font-bold mb-2">{i18n.T(ctx, "users.delete_user_confirmation")}</p>
 		<div class="flex items-center justify-between mt-4">
-			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">Confirm delete</button>
+			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">{i18n.T(ctx, "users.confirm_delete")}</button>
 		</div>
 		if errors.Has("form") {
 			<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
@@ -141,9 +142,9 @@ templ DeleteUserConfirmationModal(userId int64, errors v.Errors) {
 
 templ DeleteInvitationConfirmationModal(invitationId int64, errors v.Errors) {
 	<form hx-delete={ string(fmt.Sprintf("/invitation/%d", invitationId)) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id={ fmt.Sprintf("deleteInvitationModal%d", invitationId) } hx-target={ fmt.Sprintf("#deleteInvitationModal%d", invitationId) } hx-swap="outerHTML">
-		<p class="block text-gray-700 text-sm font-bold mb-2">Are you sure you want to delete this invitation?</p>
+		<p class="block text-gray-700 text-sm font-bold mb-2">{i18n.T(ctx, "users.delete_invitation_confirmation")}</p>
 		<div class="flex items-center justify-between mt-4">
-			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">Confirm delete</button>
+			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">{i18n.T(ctx, "users.confirm_delete")}</button>
 		</div>
 		if errors.Has("form") {
 			<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>

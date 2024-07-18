@@ -8,7 +8,58 @@ fr:
     messages: Messages
     websites: Domaines
     users: Utilisateurs
-    profile: Profils
+    profile: Profil
+
+  profile:
+    welcome: Bienvenue,
+    back_to_home: Retour à l'accueil
+    sign_out: Déconnexion
+    role: Rôle
+    firstName: Prénom
+    lastName: Nom de famille
+    email: E-mail
+    update: Mettre à jour
+    success: Profil mis à jour avec succès
+
+  users:
+    invite: Inviter un utilisateur
+    close: Fermer
+    invitations: Invitations
+    users: Utilisateurs
+    email: E-mail
+    invited_by: Invité par
+    actions: Actions
+    first_name: Prénom
+    last_name: Nom de famille
+    role: Rôle
+    no_users: Aucun utilisateur
+    delete: Supprimer
+    cancel: Annuler
+    email_placeholder: exemple@email.com
+    invite_user: Inviter un utilisateur
+    delete_user_confirmation: Êtes-vous sûr de vouloir supprimer cet utilisateur ?
+    confirm_delete: Confirmer la suppression
+    delete_invitation_confirmation: Êtes-vous sûr de vouloir supprimer cette invitation ?
+
+  auth:
+    signup_link: Inscription
+    form:
+      email: E-mail
+      password: Mot de passe
+      password_err: "Erreur :"
+      login_btn: Se connecter
+
+  signup:
+    signup: S'inscrire
+    signup_btn: S'inscrire
+    existing_account: Vous avez déjà un compte ? Connectez-vous ici.
+    confirm_email: "Un lien de confirmation a été envoyé à l'adresse :"
+    form:
+      email: E-mail
+      first_name: Prénom
+      last_name: Nom de famille
+      password: Mot de passe
+      confirm_password: Confirmer le mot de passe
 
   websites:
     name: Nom

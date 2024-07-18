@@ -34,11 +34,10 @@ func InitializeRoutes(router *chi.Mux) {
 		RedirectURL: "/login",
 	}
 
-	router.Get("/set-language", HandleSetLanguage)
-
 	// Routes that "might" have an authenticated user
 	router.Group(func(app chi.Router) {
 		app.Use(kit.WithAuthentication(authConfig, false)) // strict set to false
+		router.Get("/set-language", HandleSetLanguage)
 
 		// Routes
 		app.Get("/api/messages", kit.Handler(handlers.HandleApi))
