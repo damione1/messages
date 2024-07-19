@@ -21,7 +21,7 @@ func InitializeMiddleware(router *chi.Mux) {
 	router.Use(chimiddleware.Logger)
 	router.Use(chimiddleware.Recoverer)
 	router.Use(newLanguageMiddleware)
-	router.Use(middleware.WithRequestURL)
+	router.Use(middleware.WithRequest)
 }
 
 // Define your routes in here
