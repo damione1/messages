@@ -1,0 +1,6 @@
+{
+  "files.readonlyInclude": {
+    "*_templ.go": true,
+    "*_templ.txt": true
+  }
+}
