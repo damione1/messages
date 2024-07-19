@@ -26,10 +26,3 @@ type WebsiteFormValues struct {
 	Domain  string `form:"domain"`
 	Staging bool   `form:"staging"`
 }
-
-type ConfirmationModalProps struct {
-	Title   string
-	Message string
-	Action  string
-	Errors  v.Errors
-}

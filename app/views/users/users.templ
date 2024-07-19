@@ -82,12 +82,11 @@ templ singleUser(user *UserListItem) {
 		<td class="px-6 py-4">{ user.Email }</td>
 		<td class="px-6 py-4">{ user.Role }</td>
 		<td class="px-6 py-4">
-			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:  i18n.T(ctx, "users.delete"),
-				CloseButtonTxt: i18n.T(ctx, "users.cancel"),
-			}) {
-				@DeleteUserConfirmationModal(user.ID, v.Errors{})
-			}
+			<button
+			hx-delete={ string(fmt.Sprintf("/user/%d", user.ID)) }
+			hx-confirm={i18n.T(ctx, "users.delete_user_confirmation")}
+			hx-swap="none"
+			>{i18n.T(ctx, "users.delete")}</button>
 		</td>
 	</tr>
 }
@@ -97,12 +96,11 @@ templ singleInvitation(invitation *InvitationListItem) {
 		<td class="px-6 py-4">{ invitation.Email }</td>
 		<td class="px-6 py-4">{ invitation.InvitedBy }</td>
 		<td class="px-6 py-4">
-			@component_modal.Modal(component_modal.ModalProps{
-				OpenButtonTxt:  i18n.T(ctx, "users.delete"),
-				CloseButtonTxt: i18n.T(ctx, "users.cancel"),
-			}) {
-				@DeleteInvitationConfirmationModal(invitation.ID, v.Errors{})
-			}
+			<button
+			hx-delete={ string(fmt.Sprintf("/invitation/%d", invitation.ID)) }
+			hx-confirm={i18n.T(ctx, "users.delete_invitation_confirmation")}
+			hx-swap="none"
+			>{i18n.T(ctx, "users.delete")}</button>
 		</td>
 	</tr>
 }
@@ -126,28 +124,4 @@ templ UserForm(values *UserFormValues, errors v.Errors) {
 	if errors.Has("form") {
 		<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
 	}
-}
-
-templ DeleteUserConfirmationModal(userId int64, errors v.Errors) {
-	<form hx-delete={ fmt.Sprintf("/user/%d", userId) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id={ fmt.Sprintf("deleteUserModal%d", userId) } hx-target={ fmt.Sprintf("#deleteUserModal%d", userId) } hx-swap="outerHTML">
-		<p class="block text-gray-700 text-sm font-bold mb-2">{i18n.T(ctx, "users.delete_user_confirmation")}</p>
-		<div class="flex items-center justify-between mt-4">
-			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">{i18n.T(ctx, "users.confirm_delete")}</button>
-		</div>
-		if errors.Has("form") {
-			<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
-		}
-	</form>
-}
-
-templ DeleteInvitationConfirmationModal(invitationId int64, errors v.Errors) {
-	<form hx-delete={ string(fmt.Sprintf("/invitation/%d", invitationId)) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id={ fmt.Sprintf("deleteInvitationModal%d", invitationId) } hx-target={ fmt.Sprintf("#deleteInvitationModal%d", invitationId) } hx-swap="outerHTML">
-		<p class="block text-gray-700 text-sm font-bold mb-2">{i18n.T(ctx, "users.delete_invitation_confirmation")}</p>
-		<div class="flex items-center justify-between mt-4">
-			<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">{i18n.T(ctx, "users.confirm_delete")}</button>
-		</div>
-		if errors.Has("form") {
-			<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
-		}
-	</form>
 }

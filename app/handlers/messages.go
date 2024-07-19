@@ -247,19 +247,22 @@ func upsertMessageWebsites(ctx context.Context, messageId int64, websites []stri
 func HandleMessageDelete(kit *kit.Kit) error {
 	messageId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	_, err = models.Messages(
 		models.MessageWhere.ID.EQ(messageId),
 	).DeleteAll(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	_, err = models.WebsitesMessages(
 		models.WebsitesMessageWhere.MessageId.EQ(messageId),
 	).DeleteAll(kit.Request.Context(), db.Query)
+	if err != nil {
+		return helpers.RenderNoticeError(kit, err)
+	}
 
 	return kit.Redirect(200, "/messages")
 }

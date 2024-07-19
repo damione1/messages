@@ -1,12 +1,14 @@
 package layouts
 
 import "messages/app/views/components/navigation"
+import "messages/app/views/components/notices"
 
 templ App() {
 	<div class="">
 		@BaseLayout() {
 			@component_navigation.Navigation()
 			<div class="max-w-7xl mx-auto">
+				@component_notice.Notice(&component_notice.NoticeProps{})
 				{ children... }
 			</div>
 		}

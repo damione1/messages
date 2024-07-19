@@ -75,7 +75,11 @@ templ SingleWebsite(singleWebsite *WebsiteListItem) {
 		</td>
 		<td class="px-6 py-4 flex">
 			<a href={ templ.SafeURL(fmt.Sprintf("/website/%d", singleWebsite.ID)) } class="mr-4">{i18n.T(ctx, "websites.action.edit")}</a>
-			@DeleteConfirmationModal(singleWebsite.ID, fmt.Sprintf("/website/%d", singleWebsite.ID))
+			<button
+			hx-delete={ string(fmt.Sprintf("/website/%d", singleWebsite.ID)) }
+			hx-confirm={i18n.T(ctx, "websites.modal.delete.message")}
+			hx-swap="none"
+			>{i18n.T(ctx, "websites.action.delete")}</button>
 		</td>
 	</tr>
 }
@@ -120,40 +124,10 @@ templ WebsiteForm(values *WebsiteFormValues, errors v.Errors) {
 	}
 }
 
-templ ConfirmationModalContent(props *ConfirmationModalProps) {
-	<h3 class="text-lg font-bold">{ props.Title }</h3>
-	<p class="block text-gray-700 text-sm font-bold mb-2">{ props.Message }</p>
-	<div class="flex items-center justify-between mt-4">
-		<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">{ props.Action }</button>
-	</div>
-	if props.Errors.Has("form") {
-		<div class="text-red-500 text-xs mt-2">{ props.Errors.Get("form")[0] }</div>
-	}
-}
-
-func GetDefaultConfirmationModalProps(ctx context.Context) *ConfirmationModalProps {
-	return &ConfirmationModalProps{
-		Title:   i18n.T(ctx, "websites.modal.delete.title"),
-		Message: i18n.T(ctx, "websites.modal.delete.message"),
-		Action:  i18n.T(ctx, "websites.modal.delete.btn"),
-		Errors:  v.Errors{},
-	}
-}
 
 func createOrUpdate(ctx context.Context, id int64) string {
 	if id > 0 {
 		return i18n.T(ctx, "websites.btn.update")
 	}
 	return i18n.T(ctx, "websites.btn.create")
-}
-
-templ DeleteConfirmationModal(id int64, actionURL string) {
-	@component_modal.Modal(component_modal.ModalProps{
-		OpenButtonTxt: i18n.T(ctx, "websites.action.delete"),
-		CloseButtonTxt: i18n.T(ctx, "websites.action.close"),
-	}) {
-		<form hx-delete={ actionURL } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id={ fmt.Sprintf("deleteWebsite%d", id) } hx-target={ fmt.Sprintf("#deleteWebsite%d", id) } hx-swap="innerHTML">
-			@ConfirmationModalContent(GetDefaultConfirmationModalProps(ctx))
-		</form>
-	}
 }
