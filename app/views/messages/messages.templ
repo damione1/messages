@@ -26,7 +26,6 @@ type IndexPageData struct {
 templ Index(data *IndexPageData) {
 
 	@layouts.App() {
-		//create message button
 		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
 				OpenButtonTxt:   i18n.T(ctx, "messages.btn.create"),
