@@ -100,6 +100,10 @@ en:
       edit: Edit message
       update: Update message
       delete: Delete message
+    status:
+      scheduled: Scheduled
+      expired: Expired
+      active: Active
     table:
       name: Name
       from: Display from

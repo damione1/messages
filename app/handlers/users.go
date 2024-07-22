@@ -20,7 +20,7 @@ import (
 
 func HandleUsersList(kit *kit.Kit) error {
 	data := &users.IndexPageData{
-		FormValues:     &users.UserFormValues{},
+		FormValues:     &users.InvitationFormValues{},
 		InvitationList: make([]*users.InvitationListItem, 0),
 	}
 
@@ -71,17 +71,17 @@ var createUserSchema = v.Schema{
 
 func HandleInvitationCreate(kit *kit.Kit) error {
 	auth := kit.Auth().(auth.Auth)
-	formValues := &users.UserFormValues{}
+	formValues := &users.InvitationFormValues{}
 	errors := v.Errors{}
 
 	if auth.Role != "admin" {
 		errors.Add("form", "You do not have permission to invite users")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	errors, ok := v.Request(kit.Request, formValues, createUserSchema)
 	if !ok {
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	ok, err := models.Users(
@@ -89,11 +89,11 @@ func HandleInvitationCreate(kit *kit.Kit) error {
 	).Exists(kit.Request.Context(), db.Query)
 	if err != nil {
 		errors.Add("form", "Internal error")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 	if ok {
 		errors.Add("form", "User already exists")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	ok, err = models.Invitations(
@@ -101,11 +101,11 @@ func HandleInvitationCreate(kit *kit.Kit) error {
 	).Exists(kit.Request.Context(), db.Query)
 	if err != nil {
 		errors.Add("form", "Internal error")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 	if ok {
 		errors.Add("form", "User already invited")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	invitation := models.Invitation{

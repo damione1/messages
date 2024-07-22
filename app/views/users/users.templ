@@ -11,15 +11,14 @@ import (
 
 templ Index(data *IndexPageData) {
 	@layouts.App() {
-		//create user button
 		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
 				OpenButtonTxt:   i18n.T(ctx, "users.invite"),
 				OpenButtonClass: "bg-blue-500 hover:bg-gray-700 bg-gray-50 light:bg-gray-200 dark:bg-gray-900 dark:text-gray-400 font-bold py-2 px-4 rounded",
 				CloseButtonTxt:  i18n.T(ctx, "users.close"),
 			}) {
-				<form hx-post="/invitation" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="userForm" hx-target="#userForm" hx-swap="innerHTML">
-					@UserForm(data.FormValues, data.FormErrors)
+				<form hx-post="/invitation" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="InvitationForm" hx-target="#InvitationForm" hx-swap="innerHTML">
+					@InvitationForm(data.FormValues, data.FormErrors)
 				</form>
 			}
 		</div>
@@ -105,7 +104,7 @@ templ singleInvitation(invitation *InvitationListItem) {
 	</tr>
 }
 
-templ UserForm(values *UserFormValues, errors v.Errors) {
+templ InvitationForm(values *InvitationFormValues, errors v.Errors) {
 	<div class="mb-4">
 		@component_inputfield.InputField(&component_inputfield.InputFieldProps{
 			Label:       i18n.T(ctx, "users.email"),

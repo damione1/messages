@@ -19,10 +19,10 @@ type InvitationListItem struct {
 type IndexPageData struct {
 	UsersList      []*UserListItem
 	InvitationList []*InvitationListItem
-	FormValues     *UserFormValues
+	FormValues     *InvitationFormValues
 	FormErrors     v.Errors
 }
 
-type UserFormValues struct {
+type InvitationFormValues struct {
 	Email string `form:"email"`
 }

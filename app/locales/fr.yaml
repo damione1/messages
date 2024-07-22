@@ -100,6 +100,10 @@ fr:
       edit: Modifier le message
       update: Mettre à jour le message
       delete: Supprimer le message
+    status:
+      scheduled: Programmé
+      expired: Expiré
+      active: Actif
     table:
       name: Nom
       from: Afficher de
