@@ -30,18 +30,18 @@ RUN go mod tidy \
 # Stage 3: Final runtime image
 FROM golang:alpine as runner
 
-RUN apk --no-cache add ca-certificates tzdata libc6-compat libgcc libstdc++ make
+#RUN apk --no-cache add ca-certificates tzdata libc6-compat libgcc libstdc++ make
+RUN apk --no-cache add make
 WORKDIR /app
 
 COPY --from=builder /app/app_build .
-COPY --from=builder /app/public/assets /app/public/assets
+#COPY --from=builder /app/public/assets /app/public/assets
+COPY .env.sample .env
+COPY Makefile Makefile
+COPY app/db/migrations app/db/migrations
 
 VOLUME /app/db
 
-COPY .env.sample .env
-
-COPY Makefile Makefile
-COPY app/db/migrations app/db/migrations
 
 COPY entrypoint.sh /entrypoint.sh
 

@@ -176,12 +176,12 @@ func HandleSignupCreate(kit *kit.Kit) error {
 		}
 	}
 
-	user, err := createUserFromFormValues(values, role)
+	_, err = createUserFromFormValues(values, role)
 	if err != nil {
 		return err
 	}
 
-	return kit.Render(ConfirmEmail(user.Email))
+	return kit.Render(AccountCreated())
 }
 
 func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
@@ -206,11 +206,7 @@ func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
 	if session.R.User == nil {
 		return auth, nil
 	}
-	// TODO: do we really need to check if the user is verified
-	// even if we check that already in the login process.
-	// if session.User.EmailVerifiedAt.Equal(time.Time{}) {
-	// 	return Auth{}, nil
-	// }
+
 	return Auth{
 		LoggedIn: true,
 		UserID:   int(session.UserID),

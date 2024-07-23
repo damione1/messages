@@ -40,6 +40,16 @@ fr:
     delete_user_confirmation: Êtes-vous sûr de vouloir supprimer cet utilisateur ?
     confirm_delete: Confirmer la suppression
     delete_invitation_confirmation: Êtes-vous sûr de vouloir supprimer cette invitation ?
+    btn:
+      change_role: Changer le rôle
+      close: Fermer
+    roles:
+      form:
+        role: Role
+        placeholder: Sélectionnez le rôle
+      values:
+        admin: Administrateur
+        user: Utilisateur
 
   auth:
     signup_link: Inscription
@@ -53,7 +63,9 @@ fr:
     signup: S'inscrire
     signup_btn: S'inscrire
     existing_account: Vous avez déjà un compte ? Connectez-vous ici.
+    login: Connexion
     confirm_email: "Un lien de confirmation a été envoyé à l'adresse :"
+    account_created: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter."
     form:
       email: E-mail
       first_name: Prénom
@@ -100,6 +112,10 @@ fr:
       edit: Modifier le message
       update: Mettre à jour le message
       delete: Supprimer le message
+    status:
+      scheduled: Programmé
+      expired: Expiré
+      active: Actif
     table:
       name: Nom
       from: Afficher de

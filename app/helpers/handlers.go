@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"errors"
+	component_notice "messages/app/views/components/notices"
 	"messages/plugins/auth"
 	"strconv"
 
@@ -23,4 +24,12 @@ func VerifyAdminRole(auth auth.Auth) error {
 		return errors.New("You are not allowed to perform this action")
 	}
 	return nil
+}
+
+func RenderNoticeError(kit *kit.Kit, err error) error {
+	return kit.Render(component_notice.Notice(&component_notice.NoticeProps{
+		Title:   "Error",
+		Content: err.Error(),
+		Type:    component_notice.NoticeTypeEnum_Danger,
+	}))
 }

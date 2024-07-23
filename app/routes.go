@@ -21,7 +21,7 @@ func InitializeMiddleware(router *chi.Mux) {
 	router.Use(chimiddleware.Logger)
 	router.Use(chimiddleware.Recoverer)
 	router.Use(newLanguageMiddleware)
-	router.Use(middleware.WithRequestURL)
+	router.Use(middleware.WithRequest)
 }
 
 // Define your routes in here
@@ -80,6 +80,7 @@ func InitializeRoutes(router *chi.Mux) {
 		app.Get("/websites", kit.Handler(handlers.HandleWebsitesList))
 
 		app.Get("/users", kit.Handler(handlers.HandleUsersList))
+		app.Patch("/user/{id}/role", kit.Handler(handlers.HandleUserRoleUpdate))
 		app.Delete("/user/{id}", kit.Handler(handlers.HandleUserDelete))
 
 		app.Post("/invitation", kit.Handler(handlers.HandleInvitationCreate))

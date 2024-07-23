@@ -16,9 +16,7 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
+	kit.Setup()
 
 	if err := ctxi18n.LoadWithDefault(locales.LocalesFs, "en"); err != nil {
 		log.Fatalf("error loading locales with default: %v", err)

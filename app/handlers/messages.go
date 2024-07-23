@@ -7,6 +7,7 @@ import (
 	"messages/app/db"
 	"messages/app/helpers"
 	"messages/app/models"
+	"messages/app/types"
 	"messages/app/views/messages"
 	"messages/plugins/auth"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	v "github.com/anthdm/superkit/validate"
+	"github.com/invopop/ctxi18n/i18n"
 
 	"github.com/anthdm/superkit/kit"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -43,7 +45,7 @@ func HandleMessagesList(kit *kit.Kit) error {
 			DisplayTo:   dbMessage.DisplayTo,
 			Type:        dbMessage.Type,
 			Language:    dbMessage.Language,
-			Status:      getMessageStatus(dbMessage),
+			Status:      getMessageStatus(kit.Request.Context(), dbMessage),
 		})
 	}
 	data.MessagesList = messagesList
@@ -56,7 +58,7 @@ func HandleMessageGet(kit *kit.Kit) error {
 	if err != nil {
 		return err
 	}
-	// // Get the message from the database
+
 	dbMessage, err := models.Messages(
 		models.MessageWhere.ID.EQ(messageId),
 	).One(kit.Request.Context(), db.Query)
@@ -112,19 +114,20 @@ func HandleMessageCreate(kit *kit.Kit) error {
 	}
 
 	if err := parseMultiSelectFields(kit.Request, formValues); err != nil {
-		// Handle error if multi-select parsing fails
 		errors.Add("_error", err.Error())
 		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	displayFrom, err := processTimeWithTimezone(formValues.DateRangeFrom)
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to parse date range from")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	displayTo, err := processTimeWithTimezone(formValues.DateRangeTo)
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to parse date range to")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	dbMessage := &models.Message{
@@ -139,12 +142,14 @@ func HandleMessageCreate(kit *kit.Kit) error {
 
 	err = dbMessage.Insert(kit.Request.Context(), db.Query, boil.Infer())
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to create message")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	err = upsertMessageWebsites(kit.Request.Context(), dbMessage.ID, formValues.Websites)
 	if err != nil {
-		return err
+		errors.Add("form", "Failed to create message websites")
+		return kit.Render(messages.MessageForm(formValues, formSettings, errors))
 	}
 
 	return kit.Redirect(200, "/messages")
@@ -247,19 +252,22 @@ func upsertMessageWebsites(ctx context.Context, messageId int64, websites []stri
 func HandleMessageDelete(kit *kit.Kit) error {
 	messageId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	_, err = models.Messages(
 		models.MessageWhere.ID.EQ(messageId),
 	).DeleteAll(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	_, err = models.WebsitesMessages(
 		models.WebsitesMessageWhere.MessageId.EQ(messageId),
 	).DeleteAll(kit.Request.Context(), db.Query)
+	if err != nil {
+		return helpers.RenderNoticeError(kit, err)
+	}
 
 	return kit.Redirect(200, "/messages")
 }
@@ -284,16 +292,16 @@ func getBaseMessageFormSettings(ctx context.Context) *messages.MessageFormSettin
 	return settings
 }
 
-func getMessageStatus(message *models.Message) string {
+func getMessageStatus(ctx context.Context, message *models.Message) string {
 	loc, _ := time.LoadLocation(kit.Getenv("TIMEZONE", "UTC"))
 	now := time.Now().In(loc)
 	switch {
 	case message.DisplayFrom.After(now):
-		return messages.ScheduledEnum
+		return i18n.T(ctx, fmt.Sprintf("messages.status.%s", types.MessagesScheduledEnum))
 	case message.DisplayTo.Before(now):
-		return messages.ExpiredEnum
+		return i18n.T(ctx, fmt.Sprintf("messages.status.%s", types.MessagesExpiredEnum))
 	default:
-		return messages.ActiveEnum
+		return i18n.T(ctx, fmt.Sprintf("messages.status.%s", types.MessagesActiveEnum))
 	}
 }
 

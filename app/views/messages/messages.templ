@@ -24,9 +24,7 @@ type IndexPageData struct {
 }
 
 templ Index(data *IndexPageData) {
-
 	@layouts.App() {
-		//create message button
 		<div class="text-center flex flex-col justify-center items-center mt-10 lg:mt-10 mb-10">
 			@component_modal.Modal(component_modal.ModalProps{
 				OpenButtonTxt:   i18n.T(ctx, "messages.btn.create"),
@@ -91,12 +89,6 @@ type MessageListItem struct {
 	Status      string
 }
 
-const (
-	ScheduledEnum string = "Scheduled"
-	ExpiredEnum   string = "Expired"
-	ActiveEnum    string = "Active"
-)
-
 templ SingleMessage(singleMessage *MessageListItem) {
 	<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
 		<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"><a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">{ singleMessage.Title }</a></th>
@@ -107,10 +99,15 @@ templ SingleMessage(singleMessage *MessageListItem) {
 		<td class="px-6 py-4">{ singleMessage.Type }</td>
 		<td class="px-6 py-4">
 			<a href={ templ.SafeURL(fmt.Sprintf("/message/%d", singleMessage.ID)) } class="">{i18n.T(ctx, "messages.btn.edit")}</a>
-			@deleteConfirmationModal(singleMessage.ID)
+			<button
+			hx-delete={ string(fmt.Sprintf("/message/%d", singleMessage.ID)) }
+			hx-confirm={i18n.T(ctx, "messages.delete.confirmation_msg")}
+			hx-swap="none"
+			>{i18n.T(ctx, "messages.btn.delete")}</button>
 		</td>
 	</tr>
 }
+
 
 type MessageFormSettings struct {
 	DateMin  time.Time
@@ -228,19 +225,5 @@ templ MessageForm(values *MessageFormValues, settings *MessageFormSettings, erro
 	</button>
 	if errors.Has("form") {
 		<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
-	}
-}
-
-templ deleteConfirmationModal(deleteMessageID int64) {
-	@component_modal.Modal(component_modal.ModalProps{
-		OpenButtonTxt:  i18n.T(ctx, "messages.btn.delete"),
-		CloseButtonTxt: i18n.T(ctx, "messages.btn.cancel"),
-	}) {
-		<form hx-delete={ string(fmt.Sprintf("/message/%d", deleteMessageID)) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="deleteForm" hx-target="#deleteForm" hx-swap="outerHTML">
-			<p class="block text-gray-700 text-sm font-bold mb-2">{i18n.T(ctx, "messages.delete.confirmation_msg")}</p>
-			<div class="flex items-center justify-between mt-4">
-				<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">{i18n.T(ctx, "messages.delete.confirmation_btn")}</button>
-			</div>
-		</form>
 	}
 }

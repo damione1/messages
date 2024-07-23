@@ -40,6 +40,16 @@ en:
     delete_user_confirmation: Are you sure you want to delete this user?
     confirm_delete: Confirm delete
     delete_invitation_confirmation: Are you sure you want to delete this invitation?
+    btn:
+      change_role: Change role
+      close: Close
+    roles:
+      form:
+        role: Role
+        placeholder: Select role
+      values:
+        admin: Admin
+        user: User
 
   auth:
     signup_link: Don't have an account? Signup here.
@@ -53,7 +63,9 @@ en:
     signup: Signup
     signup_btn: Signup
     existing_account: Already have an account? Login here.
+    login: Login
     confirm_email: "An email confirmation link has been sent to:"
+    account_created: "Your account has been created. You can now login."
     form:
       email: Email
       first_name: First Name
@@ -100,6 +112,10 @@ en:
       edit: Edit message
       update: Update message
       delete: Delete message
+    status:
+      scheduled: Scheduled
+      expired: Expired
+      active: Active
     table:
       name: Name
       from: Display from

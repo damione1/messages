@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"errors"
+	"messages/app/acs"
 	"messages/app/db"
+	"messages/app/helpers"
 	"messages/app/models"
 	"messages/app/views/users"
 	"messages/plugins/auth"
@@ -18,13 +21,13 @@ import (
 
 func HandleUsersList(kit *kit.Kit) error {
 	data := &users.IndexPageData{
-		FormValues:     &users.UserFormValues{},
+		FormValues:     &users.InvitationFormValues{},
 		InvitationList: make([]*users.InvitationListItem, 0),
 	}
 
 	dbUsersList, err := models.Users().All(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	usersList := make([]*users.UserListItem, 0, len(dbUsersList))
@@ -43,7 +46,7 @@ func HandleUsersList(kit *kit.Kit) error {
 		qm.Load(models.InvitationRels.InvitedByUser),
 	).All(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	invitationsList := make([]*users.InvitationListItem, 0, len(dbInvitationsList))
@@ -69,17 +72,17 @@ var createUserSchema = v.Schema{
 
 func HandleInvitationCreate(kit *kit.Kit) error {
 	auth := kit.Auth().(auth.Auth)
-	formValues := &users.UserFormValues{}
+	formValues := &users.InvitationFormValues{}
 	errors := v.Errors{}
 
 	if auth.Role != "admin" {
 		errors.Add("form", "You do not have permission to invite users")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	errors, ok := v.Request(kit.Request, formValues, createUserSchema)
 	if !ok {
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	ok, err := models.Users(
@@ -87,11 +90,11 @@ func HandleInvitationCreate(kit *kit.Kit) error {
 	).Exists(kit.Request.Context(), db.Query)
 	if err != nil {
 		errors.Add("form", "Internal error")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 	if ok {
 		errors.Add("form", "User already exists")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	ok, err = models.Invitations(
@@ -99,11 +102,11 @@ func HandleInvitationCreate(kit *kit.Kit) error {
 	).Exists(kit.Request.Context(), db.Query)
 	if err != nil {
 		errors.Add("form", "Internal error")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 	if ok {
 		errors.Add("form", "User already invited")
-		return kit.Render(users.UserForm(formValues, errors))
+		return kit.Render(users.InvitationForm(formValues, errors))
 	}
 
 	invitation := models.Invitation{
@@ -121,68 +124,104 @@ func HandleInvitationCreate(kit *kit.Kit) error {
 
 func HandleUserDelete(kit *kit.Kit) error {
 	auth := kit.Auth().(auth.Auth)
-	errors := v.Errors{}
 
 	userId, err := strconv.ParseInt(chi.URLParam(kit.Request, "id"), 10, 64)
 	if err != nil {
-		errors.Add("form", "Not found")
-		return kit.Render(users.DeleteUserConfirmationModal(0, errors))
+		return helpers.RenderNoticeError(kit, errors.New("Not found"))
 	}
 
 	if auth.Role != "admin" {
-		errors.Add("form", "You do not have permission to delete users")
-		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
+		return helpers.RenderNoticeError(kit, errors.New("You do not have permission to delete users"))
 	}
 
 	if int64(auth.UserID) == userId {
-		errors.Add("form", "You cannot delete yourself")
-		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
+		return helpers.RenderNoticeError(kit, errors.New("You cannot delete yourself"))
 	}
 
 	user, err := models.Users(
 		models.UserWhere.ID.EQ(userId),
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {
-		errors.Add("form", "Internal error")
-		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	_, err = user.Delete(kit.Request.Context(), db.Query)
 	if err != nil {
-		errors.Add("form", "Internal error")
-		return kit.Render(users.DeleteUserConfirmationModal(userId, errors))
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	return kit.Redirect(200, "/users")
 }
 
 func HandleInvitationDelete(kit *kit.Kit) error {
-	errors := v.Errors{}
 	auth := kit.Auth().(auth.Auth)
 
 	if auth.Role != "admin" {
-		errors.Add("form", "You do not have permission to delete invitations")
-		return kit.Render(users.DeleteInvitationConfirmationModal(0, errors))
+		return helpers.RenderNoticeError(kit, errors.New("You do not have permission to delete invitations"))
 	}
 
 	invitationId, err := strconv.ParseInt(chi.URLParam(kit.Request, "id"), 10, 64)
 	if err != nil {
-		errors.Add("form", "Not found")
-		return kit.Render(users.DeleteInvitationConfirmationModal(invitationId, errors))
+		return helpers.RenderNoticeError(kit, errors.New("Not found"))
 	}
 
 	invitation, err := models.Invitations(
 		models.InvitationWhere.ID.EQ(invitationId),
 	).One(kit.Request.Context(), db.Query)
 	if err != nil {
-		errors.Add("form", "Internal error")
-		return kit.Render(users.DeleteInvitationConfirmationModal(invitationId, errors))
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	_, err = invitation.Delete(kit.Request.Context(), db.Query)
 	if err != nil {
-		errors.Add("form", "Internal error")
-		return kit.Render(users.DeleteInvitationConfirmationModal(invitationId, errors))
+		return helpers.RenderNoticeError(kit, err)
+	}
+
+	return kit.Redirect(200, "/users")
+}
+
+var UpdateUserRoleFormValuesSchema = v.Schema{
+	"role": v.Rules(v.Required, v.In([]string{acs.RoleUser, acs.RoleAdmin})),
+}
+
+func HandleUserRoleUpdate(kit *kit.Kit) error {
+	auth := kit.Auth().(auth.Auth)
+	formValues := &users.UpdateUserRoleFormValues{}
+	errors := v.Errors{}
+
+	errors, ok := v.Request(kit.Request, formValues, UpdateUserRoleFormValuesSchema)
+	if !ok {
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	if ok := acs.IsValidRole(formValues.Role); !ok {
+		errors.Add("role", "Invalid role")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	if ok := acs.HasMinimumRole(auth, acs.RoleAdmin); !ok {
+		errors.Add("form", "You do not have permission to change user roles")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	userId, err := strconv.ParseInt(chi.URLParam(kit.Request, "id"), 10, 64)
+	if err != nil {
+		errors.Add("form", "User id is invalid")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	if int64(auth.UserID) == userId {
+		errors.Add("form", "You cannot change your own role")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	_, err = models.Users(
+		models.UserWhere.ID.EQ(userId),
+	).UpdateAll(kit.Request.Context(), db.Query, models.M{
+		"role": formValues.Role,
+	})
+	if err != nil {
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	return kit.Redirect(200, "/users")

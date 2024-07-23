@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"messages/app/db"
 	"messages/app/helpers"
 	"messages/app/models"
@@ -20,7 +21,7 @@ func HandleWebsitesList(kit *kit.Kit) error {
 
 	dbWebsitesList, err := models.Websites().All(kit.Request.Context(), db.Query)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	websitesList := make([]*websites.WebsiteListItem, 0, len(dbWebsitesList))
@@ -40,13 +41,13 @@ func HandleWebsitesList(kit *kit.Kit) error {
 func HandleWebsiteGet(kit *kit.Kit) error {
 	websiteId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	// // Get the website from the database
 	dbWebsite, err := models.FindWebsite(kit.Request.Context(), db.Query, websiteId)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	data := &websites.PageWebsiteEditData{
@@ -128,26 +129,20 @@ func HandleWebsiteUpdate(kit *kit.Kit) error {
 }
 
 func HandleWebsiteDelete(kit *kit.Kit) error {
-	errors := v.Errors{}
-	confirmationModalProps := websites.GetDefaultConfirmationModalProps(kit.Request.Context())
 
 	websiteId, err := helpers.GetIdFromUrl(kit)
 	if err != nil {
-		return err
+		return helpers.RenderNoticeError(kit, err)
 	}
 
 	if err := helpers.VerifyAdminRole(kit.Auth().(auth.Auth)); err != nil {
-		errors.Add("form", "You are not allowed to delete websites")
-		confirmationModalProps.Errors = errors
-		return kit.Render(websites.ConfirmationModalContent(confirmationModalProps))
+		return helpers.RenderNoticeError(kit, errors.New("You are not allowed to delete websites"))
 	}
 
 	if _, err := models.Websites(
 		models.WebsiteWhere.ID.EQ(websiteId),
 	).DeleteAll(kit.Request.Context(), db.Query); err != nil {
-		errors.Add("form", "Failed to delete website")
-		confirmationModalProps.Errors = errors
-		return kit.Render(websites.ConfirmationModalContent(confirmationModalProps))
+		return helpers.RenderNoticeError(kit, errors.New("Failed to delete website"))
 	}
 
 	return kit.Redirect(200, "/websites")
