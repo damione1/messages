@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"messages/app/acs"
 	"messages/app/db"
 	"messages/app/helpers"
 	"messages/app/models"
@@ -172,6 +173,53 @@ func HandleInvitationDelete(kit *kit.Kit) error {
 	}
 
 	_, err = invitation.Delete(kit.Request.Context(), db.Query)
+	if err != nil {
+		return helpers.RenderNoticeError(kit, err)
+	}
+
+	return kit.Redirect(200, "/users")
+}
+
+var UpdateUserRoleFormValuesSchema = v.Schema{
+	"role": v.Rules(v.Required, v.In([]string{acs.RoleUser, acs.RoleAdmin})),
+}
+
+func HandleUserRoleUpdate(kit *kit.Kit) error {
+	auth := kit.Auth().(auth.Auth)
+	formValues := &users.UpdateUserRoleFormValues{}
+	errors := v.Errors{}
+
+	errors, ok := v.Request(kit.Request, formValues, UpdateUserRoleFormValuesSchema)
+	if !ok {
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	if ok := acs.IsValidRole(formValues.Role); !ok {
+		errors.Add("role", "Invalid role")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	if ok := acs.HasMinimumRole(auth, acs.RoleAdmin); !ok {
+		errors.Add("form", "You do not have permission to change user roles")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	userId, err := strconv.ParseInt(chi.URLParam(kit.Request, "id"), 10, 64)
+	if err != nil {
+		errors.Add("form", "User id is invalid")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	if int64(auth.UserID) == userId {
+		errors.Add("form", "You cannot change your own role")
+		return kit.Render(users.UpdateRoleConfirmationModal(formValues.Role, errors))
+	}
+
+	_, err = models.Users(
+		models.UserWhere.ID.EQ(userId),
+	).UpdateAll(kit.Request.Context(), db.Query, models.M{
+		"role": formValues.Role,
+	})
 	if err != nil {
 		return helpers.RenderNoticeError(kit, err)
 	}

@@ -5,8 +5,10 @@ import (
 	v "github.com/anthdm/superkit/validate"
 	"messages/app/views/components/inputField"
 	"messages/app/views/components/modal"
+	"messages/app/views/components/selectField"
 	"messages/app/views/layouts"
 	"github.com/invopop/ctxi18n/i18n"
+	"messages/app/acs"
 )
 
 templ Index(data *IndexPageData) {
@@ -66,6 +68,12 @@ templ usersListing(users []*UserListItem) {
 				for _, user := range users {
 					@singleUser(user)
 				}
+
+				if len(users) == 0 {
+					<tr>
+						<td class="px-6 py-4" colspan="5">No users found</td>
+					</tr>
+				}
 			</tbody>
 		</table>
 		if len(users) == 0 {
@@ -79,13 +87,22 @@ templ singleUser(user *UserListItem) {
 		<td class="px-6 py-4">{ user.FirstName }</td>
 		<td class="px-6 py-4">{ user.LastName }</td>
 		<td class="px-6 py-4">{ user.Email }</td>
-		<td class="px-6 py-4">{ user.Role }</td>
+		<td class="px-6 py-4">{ acs.GetRoleName(ctx, user.Role) }</td>
 		<td class="px-6 py-4">
 			<button
 			hx-delete={ string(fmt.Sprintf("/user/%d", user.ID)) }
 			hx-confirm={i18n.T(ctx, "users.delete_user_confirmation")}
 			hx-swap="none"
 			>{i18n.T(ctx, "users.delete")}</button>
+			@component_modal.Modal(component_modal.ModalProps{
+				OpenButtonTxt:   i18n.T(ctx, "users.btn.change_role"),
+				OpenButtonClass: "",
+				CloseButtonTxt:  i18n.T(ctx, "users.btn.close"),
+			}) {
+				<form hx-patch={ string(templ.SafeURL(fmt.Sprintf("/user/%d/role", user.ID))) } class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="user_role" hx-target="#user_role" hx-swap="innerHTML">
+					@UpdateRoleConfirmationModal( user.Role, v.Errors{})
+				</form>
+			}
 		</td>
 	</tr>
 }
@@ -98,7 +115,7 @@ templ singleInvitation(invitation *InvitationListItem) {
 			<button
 			hx-delete={ string(fmt.Sprintf("/invitation/%d", invitation.ID)) }
 			hx-confirm={i18n.T(ctx, "users.delete_invitation_confirmation")}
-			hx-swap="none"
+		hx-swap="none"
 			>{i18n.T(ctx, "users.delete")}</button>
 		</td>
 	</tr>
@@ -120,6 +137,31 @@ templ InvitationForm(values *InvitationFormValues, errors v.Errors) {
 	<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
 		{i18n.T(ctx, "users.invite_user")}
 	</button>
+	if errors.Has("form") {
+		<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
+	}
+}
+
+
+
+templ UpdateRoleConfirmationModal(currentRole string, errors v.Errors) {
+	<p class="block text-gray-700 text-sm font-bold mb-2"></p>
+	@component_selectField.SelectField(&component_selectField.SelectFieldProps{
+		Label:       i18n.T(ctx, "users.roles.form.role"),
+		Name:        "role",
+		Placeholder: i18n.T(ctx, "users.roles.form.placeholder"),
+		Error:       "",
+		Options:     acs.GetRolesList(ctx),
+		Value:       currentRole,
+	})
+	if errors.Has("role") {
+		<div class="text-red-500 text-xs mt-2">{ errors.Get("role")[0] }</div>
+	}
+	<div class="flex items-center justify-between mt-4">
+		<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">
+			{i18n.T(ctx, "users.btn.change_role")}
+		</button>
+	</div>
 	if errors.Has("form") {
 		<div class="text-red-500 text-xs mt-2">{ errors.Get("form")[0] }</div>
 	}

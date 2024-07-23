@@ -73,3 +73,6 @@ db-reset-force:
 
 models:
 	sqlboiler sqlite3
+
+generate-secret:
+	@openssl rand -base64 32

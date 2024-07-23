@@ -26,3 +26,7 @@ type IndexPageData struct {
 type InvitationFormValues struct {
 	Email string `form:"email"`
 }
+
+type UpdateUserRoleFormValues struct {
+	Role string `form:"role"`
+}

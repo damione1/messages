@@ -40,6 +40,16 @@ fr:
     delete_user_confirmation: Êtes-vous sûr de vouloir supprimer cet utilisateur ?
     confirm_delete: Confirmer la suppression
     delete_invitation_confirmation: Êtes-vous sûr de vouloir supprimer cette invitation ?
+    btn:
+      change_role: Changer le rôle
+      close: Fermer
+    roles:
+      form:
+        role: Role
+        placeholder: Sélectionnez le rôle
+      values:
+        admin: Administrateur
+        user: Utilisateur
 
   auth:
     signup_link: Inscription
