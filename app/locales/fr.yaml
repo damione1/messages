@@ -63,7 +63,9 @@ fr:
     signup: S'inscrire
     signup_btn: S'inscrire
     existing_account: Vous avez déjà un compte ? Connectez-vous ici.
+    login: Connexion
     confirm_email: "Un lien de confirmation a été envoyé à l'adresse :"
+    account_created: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter."
     form:
       email: E-mail
       first_name: Prénom

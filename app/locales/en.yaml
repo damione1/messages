@@ -63,7 +63,9 @@ en:
     signup: Signup
     signup_btn: Signup
     existing_account: Already have an account? Login here.
+    login: Login
     confirm_email: "An email confirmation link has been sent to:"
+    account_created: "Your account has been created. You can now login."
     form:
       email: Email
       first_name: First Name

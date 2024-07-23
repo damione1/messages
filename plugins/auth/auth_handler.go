@@ -181,7 +181,7 @@ func HandleSignupCreate(kit *kit.Kit) error {
 		return err
 	}
 
-	return kit.Redirect(200, "/login")
+	return kit.Render(AccountCreated())
 }
 
 func AuthenticateUser(kit *kit.Kit) (kit.Auth, error) {
